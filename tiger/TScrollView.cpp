@@ -37,7 +37,9 @@ _leftBounceNeeded(false),
 _rightBounceNeeded(false),
 _curPageIndex(0),
 _isMoved(false),
-_container(nullptr)
+_container(nullptr),
+_clippingToBounds(false),
+_scissorRestored(false)
 {
     setTopBottomMargin(0.0f);
     setLeftRightMargin(0.0f);
@@ -90,6 +92,8 @@ bool TScrollView::initWithSize(const cocos2d::Size &size)
     
     // 设置可触摸范围，默认位置起点为（0，0）.
     _frameRect = Rect(0, 0, size.width, size.height);
+    
+    _clippingToBounds = true;
     
     return true;
 }
@@ -190,6 +194,8 @@ void TScrollView::setTouchEnable(bool enabled)
         _touchListener = nullptr;
         
         _touchListener = EventListenerTouchOneByOne::create();
+        
+        _touchListener->setSwallowTouches(true);
         
         _touchListener->onTouchBegan = CC_CALLBACK_2(TScrollView::onTouchBegan, this);
         _touchListener->onTouchMoved = CC_CALLBACK_2(TScrollView::onTouchMoved, this);
@@ -409,20 +415,23 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
     Vec2 touchMovedInNodeSpace = this->convertToNodeSpace(_touchMovedInPosition);
     Vec2 touchPreviousInNodeSpace = this->convertToNodeSpace(touch->getPreviousLocation());
     
-//    setTouchLastDelta(touch->getDelta());
-    
     // Get last delta value.
     _lastDelta = touchMovedInNodeSpace - touchPreviousInNodeSpace;
     
+    
     if (_direction == Direction::VERTICAL)
     {
-        if (fabsf(_lastDelta.y) < MIN_EFFECTIVE_DISTANCE_TO_MOVE)
+        if (fabsf(_lastDelta.y) < 0.1f)
         {
             return;
         }else
         {
-            _offset.y += _lastDelta.y;
+            if (_offset.y > 0 || fabsf(_offset.y) > (_containerSize.height - _contentSize.height))
+            {
+                _lastDelta.y *= 0.15f;
+            }
             
+            _offset.y += _lastDelta.y;
             _isMoved = true;
         }
         
@@ -456,33 +465,17 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
 void TScrollView::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
 {
     _isPressed = false;
-    
-//    _endedTouch = touch;
-    
+
     _touchEndedInPosition = touch->getLocation();
     
     Vec2 delta = _touchEndedInPosition - _touchBeganInPosition;
-    
-//    if (fabsf(delta.y) < MIN_EFFECTIVE_DISTANCE_TO_MOVE)
-//    {
-//        // 当拖动距离小于有效移动距离时，可以视为是点击操作
-//        // 具体例子参考yoohoo项目
-//        
-//        TLog("TScrollView::onTouchEnded --> click some node");
-//        
-//        return;
-//        
-//    }else
-//    {
-//    }
-
     
     // Its scroll event.
     switch (_direction)
     {
         case VERTICAL:
             // If bigger than MIN_EFFECTIVE_DISTANCE_TO_SLID, then begin to auto scroll.
-            if (fabsf(_lastDelta.y) > MIN_EFFECTIVE_DISTANCE_TO_SLID)
+            if (fabsf(_lastDelta.y) > MIN_EFFECTIVE_DISTANCE_TO_SLID / 2.0f)
             {
                 _autoScroll = true;
                 TLog("TScrollView::onTouchEnded --> auto scroll is true [Vertical]");
@@ -752,7 +745,129 @@ void TScrollView::moveToCurPageOriginPos()
 }
 
 
+void TScrollView::beforeDraw()
+{
+    //ScrollView don't support drawing in 3D space
+    _beforeDrawCommand.init(_globalZOrder);
+    _beforeDrawCommand.func = CC_CALLBACK_0(TScrollView::onBeforeDraw, this);
+    Director::getInstance()->getRenderer()->addCommand(&_beforeDrawCommand);
+}
 
+/**
+ * clip this view so that outside of the visible bounds can be hidden.
+ */
+void TScrollView::onBeforeDraw()
+{
+    if (_clippingToBounds)
+    {
+        _scissorRestored = false;
+        Rect frame = getFrameRect();
+        auto glview = Director::getInstance()->getOpenGLView();
+        
+        if (glview->isScissorEnabled()) {
+            _scissorRestored = true;
+            _parentScissorRect = glview->getScissorRect();
+            //set the intersection of _parentScissorRect and frame as the new scissor rect
+            if (frame.intersectsRect(_parentScissorRect)) {
+                float x = MAX(frame.origin.x, _parentScissorRect.origin.x);
+                float y = MAX(frame.origin.y, _parentScissorRect.origin.y);
+                float xx = MIN(frame.origin.x+frame.size.width, _parentScissorRect.origin.x+_parentScissorRect.size.width);
+                float yy = MIN(frame.origin.y+frame.size.height, _parentScissorRect.origin.y+_parentScissorRect.size.height);
+                glview->setScissorInPoints(x, y, xx-x, yy-y);
+            }
+        }
+        else {
+            glEnable(GL_SCISSOR_TEST);
+            glview->setScissorInPoints(frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+        }
+    }
+}
+
+void TScrollView::afterDraw()
+{
+    _afterDrawCommand.init(_globalZOrder);
+    _afterDrawCommand.func = CC_CALLBACK_0(TScrollView::onAfterDraw, this);
+    Director::getInstance()->getRenderer()->addCommand(&_afterDrawCommand);
+}
+
+/**
+ * retract what's done in beforeDraw so that there's no side effect to
+ * other nodes.
+ */
+void TScrollView::onAfterDraw()
+{
+    if (_clippingToBounds)
+    {
+        if (_scissorRestored) {//restore the parent's scissor rect
+            auto glview = Director::getInstance()->getOpenGLView();
+            
+            glview->setScissorInPoints(_parentScissorRect.origin.x, _parentScissorRect.origin.y, _parentScissorRect.size.width, _parentScissorRect.size.height);
+        }
+        else {
+            glDisable(GL_SCISSOR_TEST);
+        }
+    }
+}
+
+void TScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t parentFlags)
+{
+    // quick return if not visible
+    if (!isVisible() || !isVisitableByVisitingCamera())
+    {
+        return;
+    }
+    
+    uint32_t flags = processParentFlags(parentTransform, parentFlags);
+    
+    // IMPORTANT:
+    // To ease the migration to v3.0, we still support the Mat4 stack,
+    // but it is deprecated and your code should not rely on it
+    Director* director = Director::getInstance();
+    CCASSERT(nullptr != director, "Director is null when seting matrix stack");
+    director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+    director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW, _modelViewTransform);
+    
+    this->beforeDraw();
+    bool visibleByCamera = isVisitableByVisitingCamera();
+    
+    if (!_children.empty())
+    {
+        int i=0;
+        
+        // draw children zOrder < 0
+        for( ; i < _children.size(); i++ )
+        {
+            Node *child = _children.at(i);
+            if ( child->getLocalZOrder() < 0 )
+            {
+                child->visit(renderer, _modelViewTransform, flags);
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        // this draw
+        if (visibleByCamera)
+            this->draw(renderer, _modelViewTransform, flags);
+        
+        // draw children zOrder >= 0
+        for( ; i < _children.size(); i++ )
+        {
+            Node *child = _children.at(i);
+            child->visit(renderer, _modelViewTransform, flags);
+        }
+    }
+    else if (visibleByCamera)
+    {
+        this->draw(renderer, _modelViewTransform, flags);
+    }
+    
+    this->afterDraw();
+    
+    director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+}
 
 
 

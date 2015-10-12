@@ -99,9 +99,9 @@ public:
     void moveToPre();
     void moveToCurPageOriginPos();
     
-    virtual bool onTouchBegan(Touch* touch, Event* event);
-    virtual void onTouchMoved(Touch* touch, Event* event);
-    virtual void onTouchEnded(Touch* touch, Event* event);
+    virtual bool onTouchBegan(Touch* touch, Event* event) override;
+    virtual void onTouchMoved(Touch* touch, Event* event) override;
+    virtual void onTouchEnded(Touch* touch, Event* event) override;
     
     void setTouchEnable(bool enabled);
     bool getIsTouchEnable() { return _touchListener != nullptr; };
@@ -111,8 +111,9 @@ public:
      */
     virtual void addEventListener(const tScrollViewCallback& callback);
     
-    void update(float dt);
+    virtual void update(float dt) override;
     
+    void setClippingToBounds(bool bClippingToBounds) { _clippingToBounds = bClippingToBounds; }
     
 protected:
     
@@ -163,7 +164,6 @@ protected:
     float  _bounceOriginalSpeed;
     
     tScrollViewCallback _eventCallback;
-
     
 protected:
     
@@ -203,6 +203,40 @@ protected:
     void   bounceChildren();  // 反弹函数
     
     void   computePageIndex();
+    
+private:
+    
+    CustomCommand _beforeDrawCommand;
+    CustomCommand _afterDrawCommand;
+    
+    bool _clippingToBounds;
+    
+    /**
+     * scissor rect for parent, just for restoring GL_SCISSOR_BOX
+     */
+    Rect _parentScissorRect;
+    bool _scissorRestored;
+    
+private:
+    
+    /**
+     * clip this view so that outside of the visible bounds can be hidden.
+     */
+    void beforeDraw();
+    void onBeforeDraw();
+    /**
+     * retract what's done in beforeDraw so that there's no side effect to
+     * other nodes.
+     */
+    void afterDraw();
+    void onAfterDraw();
+
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual void visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t parentFlags) override;
+    
 };
     
     
