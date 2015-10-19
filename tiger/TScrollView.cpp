@@ -8,6 +8,8 @@
 
 #include "TScrollView.h"
 #include "TigerMacros.h"
+#include "TigerFunctions.h"
+#include "TScrollViewBar.hpp"
 
 using namespace T;
 
@@ -16,6 +18,7 @@ using namespace T;
 #define AUTO_SCROLL_MAX_SPEED                   500.0f
 #define BOUNCE_ACTION_TIMER                     0.3f
 #define AUTO_SCROLL_SPEED_FACTOR                0.9f
+#define SCROLL_VIEW_BAR_TAG                     8282
 
 TScrollView::TScrollView():
 _isPressed(false),
@@ -44,6 +47,8 @@ _scissorRestored(false)
     setTopBottomMargin(0.0f);
     setLeftRightMargin(0.0f);
     setAutoScrollSpeedFactor(AUTO_SCROLL_SPEED_FACTOR);
+    
+    _verticalScrollBar = nullptr;
 }
 
 TScrollView::~TScrollView()
@@ -51,6 +56,7 @@ TScrollView::~TScrollView()
     TLog("TScrollView::~TScrollView()");
     
     setTouchEnable(false);
+    _verticalScrollBar = nullptr;
 }
 
 TScrollView* TScrollView::create(const cocos2d::Size &size)
@@ -123,7 +129,7 @@ void TScrollView::setContainerSize(const cocos2d::Size &size)
     if (_container == nullptr)
     {
         _container = LayerColor::create(Color4B(0, 0, 0, 0));
-        
+        _container->setAnchorPoint(Vec2::ZERO);
         this->addChild(_container);
     }
     
@@ -147,6 +153,9 @@ void TScrollView::setContentOffset(cocos2d::Vec2 offset, bool isAnim)
     }
     
     _offset = offset;
+    
+    Vec2 outOfBoundary = getHowMuchOutOfBoundary(Vec2::ZERO);
+    updateScrollBar(outOfBoundary);
 }
 
 void TScrollView::moveToTop()
@@ -406,6 +415,11 @@ bool TScrollView::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
    
     _offset = _container->getPosition();
     
+    if (_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->onTouchBegan();
+    }
+    
     return true;
 }
 
@@ -433,6 +447,7 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
             
             _offset.y += _lastDelta.y;
             _isMoved = true;
+            
         }
         
     }else if (_direction == Direction::HORIZONTAL)
@@ -496,6 +511,11 @@ void TScrollView::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
     if (!_autoScroll)
     {
         checkIsBounce();
+    }
+    
+    if (_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->onTouchEnded();
     }
     
     this->scrollTo(T::TScrollView::EventType::TOUCH_CANCELED);
@@ -870,6 +890,194 @@ void TScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_
 }
 
 
+void T::TScrollView::setScrollViewBarEnable(bool enable)
+{
+    _scrollBarEnabled = enable;
+    
+    if (enable)
+    {
+        initScrollBar();
+    }
+}
+
+
+void TScrollView::updateScrollBar(const cocos2d::Vec2 &outOfBoundary)
+{
+    if (_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->onScrolled(outOfBoundary);
+    }
+}
+
+void TScrollView::setScrollBarPositionFromCornerForVertical(const cocos2d::Vec2 &positionFromCorner)
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    CCASSERT(_direction != Direction::HORIZONTAL, "Scroll view doesn't have a vertical scroll bar!");
+    _verticalScrollBar->setPositionFromCorner(positionFromCorner);
+}
+
+
+Vec2 TScrollView::getScrollBarPositionFromCornerForVertical() const
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    CCASSERT(_direction != Direction::VERTICAL, "Scroll view doesn't have a horizontal scroll bar!");
+    return _verticalScrollBar->getPositionFromCorner();
+}
+
+void TScrollView::setScrollBarWidth(float width)
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->setWidth(width);
+    }
+
+}
+
+float TScrollView::getScrollBarWidth() const
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        return _verticalScrollBar->getWidth();
+    }
+    
+    return 0;
+}
+
+void TScrollView::setScrollBarColor(const cocos2d::Color3B &color)
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->setColor(color);
+    }
+
+}
+
+const Color3B& TScrollView::getScrollBarColor() const
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        return _verticalScrollBar->getColor();
+    }
+    
+    return Color3B::WHITE;
+}
+
+
+void TScrollView::setScrollBarOpacity(GLubyte opacity)
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->setOpacity(opacity);
+    }
+
+}
+
+GLubyte TScrollView::getScrollBarOpacity() const
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        return _verticalScrollBar->getOpacity();
+    }
+
+    return -1;
+}
+
+void TScrollView::setScrollBarAutoHideEnable(bool autoHideEnable)
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->setAutiHideEnable(autoHideEnable);
+    }
+
+}
+
+bool TScrollView::isScrollBarAutoHideEnable() const
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        return _verticalScrollBar->isAutoHideEnable();
+    }
+
+    
+    return false;
+}
+
+void TScrollView::setScrollBarAutoHideTime(float autoHideTime)
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        _verticalScrollBar->setAutoHideTime(autoHideTime);
+    }
+
+}
+
+float TScrollView::getScrollBarAutoHideTime() const
+{
+    CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
+    if(_verticalScrollBar != nullptr)
+    {
+        return _verticalScrollBar->getAutoHideTime();
+    }
+    
+    return 0;
+}
+
+void TScrollView::initScrollBar()
+{
+    if(_direction == Direction::VERTICAL && _verticalScrollBar == nullptr)
+    {
+        _verticalScrollBar = TScrollViewBar::create(this, Direction::VERTICAL);
+        addChild(_verticalScrollBar, 2);
+    }
+
+}
+
+Vec2 TScrollView::getHowMuchOutOfBoundary(const cocos2d::Vec2 &addition) const
+{
+    Vec2 result = Vec2::ZERO;
+    
+    float container_left_boundary   = _container->getPositionX() - _container->getAnchorPoint().x * _frameRect.size.width;
+    float container_rigth_boundary  = container_left_boundary    + _containerSize.width;
+    float container_bottom_boundary = _container->getPositionY() - _container->getAnchorPoint().y * _frameRect.size.height;
+    float container_top_boundary    = container_bottom_boundary  + _containerSize.height;
+    
+    if (container_left_boundary + addition.x > _frameRect.origin.x)
+    {
+        result.x = _frameRect.origin.x - (container_left_boundary + addition.x);
+    }
+    else if (container_rigth_boundary + addition.x < _frameRect.size.width)
+    {
+        result.x = _frameRect.size.width - (container_rigth_boundary + addition.x);
+    }
+    
+    if (container_top_boundary + addition.y < _frameRect.size.height)
+    {
+        result.y = _frameRect.size.height - (container_top_boundary + addition.y);
+    }
+    else if (container_bottom_boundary + addition.y > _frameRect.origin.y)
+    {
+        result.y = _frameRect.origin.y - (container_bottom_boundary + addition.y);
+    }
+    
+    return result;
+}
+
+void TScrollView::setScrollBarPositionFromCorner(const cocos2d::Vec2 &positionFromCorner)
+{
+    if(_direction != Direction::HORIZONTAL)
+    {
+        setScrollBarPositionFromCornerForVertical(positionFromCorner);
+    }
+}
 
 
 

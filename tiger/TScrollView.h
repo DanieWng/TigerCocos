@@ -13,9 +13,11 @@
 
 USING_NS_CC;
 
+
 namespace T
 {
-    
+
+class TScrollViewBar;
     
 class TScrollView : public LayerColor
 {
@@ -24,7 +26,8 @@ public:
     enum Direction
     {
         VERTICAL,
-        HORIZONTAL
+        HORIZONTAL,
+        BOTH
     };
     
     enum class EventType
@@ -59,7 +62,7 @@ public:
      Defualt constructor and destructor
      */
     TScrollView();
-    ~TScrollView();
+    virtual ~TScrollView();
     
     /**
      Allocates and initializes.
@@ -70,7 +73,7 @@ public:
     bool initWithSize(const Size& size);
     bool initWithSizeAndColor4B(const Size& size, const Color4B& color);
     
-    void onEnter();
+    virtual void onEnter() override;
     
     /**
      Get chrildrens of container.
@@ -114,6 +117,27 @@ public:
     virtual void update(float dt) override;
     
     void setClippingToBounds(bool bClippingToBounds) { _clippingToBounds = bClippingToBounds; }
+    
+    void setScrollViewBarEnable(bool enable);
+    
+    void setScrollBarWidth(float width);
+    float getScrollBarWidth() const;
+    
+    void setScrollBarColor(const Color3B& color);
+    const Color3B& getScrollBarColor() const;
+    
+    void setScrollBarOpacity(GLubyte opacity);
+    GLubyte getScrollBarOpacity() const;
+    
+    void setScrollBarAutoHideEnable(bool autoHideEnable);
+    bool isScrollBarAutoHideEnable() const;
+    
+    void setScrollBarAutoHideTime(float autoHideTime);
+    float getScrollBarAutoHideTime() const;
+    
+    void setScrollBarPositionFromCorner(const Vec2& positionFromCorner);
+    
+    void initScrollBar();
     
 protected:
     
@@ -217,6 +241,9 @@ private:
     Rect _parentScissorRect;
     bool _scissorRestored;
     
+    bool _scrollBarEnabled;
+    TScrollViewBar* _verticalScrollBar;
+    
 private:
     
     /**
@@ -237,6 +264,14 @@ private:
      */
     virtual void visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t parentFlags) override;
     
+    /**
+     关于scroll view 滚动条的函数
+     */
+    void updateScrollBar(const Vec2& outOfBoundary);
+    void setScrollBarPositionFromCornerForVertical(const Vec2& positionFromCorner);
+    Vec2 getScrollBarPositionFromCornerForVertical() const;
+    
+    Vec2 getHowMuchOutOfBoundary(const Vec2& addition) const;
 };
     
     
