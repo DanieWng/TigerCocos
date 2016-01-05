@@ -11,7 +11,7 @@
 #include "TigerFunctions.h"
 #include "TScrollViewBar.hpp"
 
-using namespace T;
+using namespace Tiger;
 
 #define MIN_EFFECTIVE_DISTANCE_TO_MOVE          2.0f
 #define MIN_EFFECTIVE_DISTANCE_TO_SLID          5
@@ -49,6 +49,8 @@ _scissorRestored(false)
     setAutoScrollSpeedFactor(AUTO_SCROLL_SPEED_FACTOR);
     
     _verticalScrollBar = nullptr;
+    
+    _vecticalMinEffectiveDistance = MIN_EFFECTIVE_DISTANCE_TO_MOVE;
 }
 
 TScrollView::~TScrollView()
@@ -110,6 +112,8 @@ bool TScrollView::initWithSizeAndColor4B(const cocos2d::Size &size, const cocos2
     {
         return false;
     }
+    
+    this->setContentSize(size);
     
     // 设置可触摸范围，默认位置起点为（0，0）.
     _frameRect = Rect(0, 0, size.width, size.height);
@@ -265,13 +269,13 @@ void TScrollView::autoScrollChildren()
     
     this->setContentOffset(_offset);
     
-    scrollTo(T::TScrollView::EventType::SLIDING);
+    scrollTo(TScrollView::EventType::SLIDING);
     
     if ((int)fabsf(_autoScrollOriginalSpeed) <= 1)
     {
         stopAutoScrollChildren();
         
-        scrollTo(T::TScrollView::EventType::SLID_ACTION_DONE);
+        scrollTo(TScrollView::EventType::SLID_ACTION_DONE);
         
         checkIsBounce();
     }
@@ -310,7 +314,7 @@ void TScrollView::bounceChildren()
     
     _container->runAction(Sequence::create(EaseBackOut::create(MoveTo::create(BOUNCE_ACTION_TIMER, move_to)),
                                            CallFunc::create(LAMBDA_FUNCTION_START
-                                                            this->scrollTo(T::TScrollView::EventType::BOUNCE_DONE);
+                                                            this->scrollTo(TScrollView::EventType::BOUNCE_DONE);
                                                             LAMBDA_FUNCTION_END),
                                            nullptr));
 
@@ -435,7 +439,8 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
     
     if (_direction == Direction::VERTICAL)
     {
-        if (fabsf(_lastDelta.y) < 0.1f)
+        // fabsf(_lastDelta.y) < 2.0f
+        if (fabsf(_touchMovedInPosition.y - _touchBeganInPosition.y) < _vecticalMinEffectiveDistance)
         {
             return;
         }else
@@ -473,7 +478,7 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
     
     this->setContentOffset(_offset);
     
-    scrollTo(T::TScrollView::EventType::SCROLLING);
+    scrollTo(TScrollView::EventType::SCROLLING);
     
 }
 
@@ -518,7 +523,7 @@ void TScrollView::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
         _verticalScrollBar->onTouchEnded();
     }
     
-    this->scrollTo(T::TScrollView::EventType::TOUCH_CANCELED);
+    this->scrollTo(TScrollView::EventType::TOUCH_CANCELED);
 }
 
 /**
@@ -531,7 +536,7 @@ bool TScrollView::checkIsBounce()
 {
     if (!_bounceEnable)
     {
-        scrollTo(T::TScrollView::EventType::SCROLLING_DONE);
+        scrollTo(TScrollView::EventType::SCROLLING_DONE);
         
         computePageIndex();
         
@@ -548,7 +553,7 @@ bool TScrollView::checkIsBounce()
                 // @Unused.
                 _bounceOriginalSpeed = fabsf(_offset.y - 0.0f);
                 
-                scrollTo(T::TScrollView::EventType::BOUNCE_BOTTOM);
+                scrollTo(TScrollView::EventType::BOUNCE_BOTTOM);
                 
             }else if (_offset.y < -_containerSize.height + _frameRect.size.height)
             {
@@ -557,10 +562,10 @@ bool TScrollView::checkIsBounce()
                 // @Unused.
                 _bounceOriginalSpeed = fabsf(_offset.y - (-_containerSize.height + _frameRect.size.height));
                 
-                scrollTo(T::TScrollView::EventType::BOUNCE_TOP);
+                scrollTo(TScrollView::EventType::BOUNCE_TOP);
             }else
             {
-                scrollTo(T::TScrollView::EventType::SCROLLING_DONE);
+                scrollTo(TScrollView::EventType::SCROLLING_DONE);
                 return false;
             }
             break;
@@ -575,7 +580,7 @@ bool TScrollView::checkIsBounce()
                 // @Unused.
                  _bounceOriginalSpeed = fabsf(_offset.x - 0.0f);
                 
-                scrollTo(T::TScrollView::EventType::BOUNCE_LEFT);
+                scrollTo(TScrollView::EventType::BOUNCE_LEFT);
                 
             }else if (_offset.x < -_containerSize.width + _frameRect.size.width)
             {
@@ -584,11 +589,11 @@ bool TScrollView::checkIsBounce()
                 // @Unused.
                 _bounceOriginalSpeed = fabsf(_offset.x - (-_containerSize.width + _frameRect.size.width));
                 
-                scrollTo(T::TScrollView::EventType::BOUNCE_RIGHT);
+                scrollTo(TScrollView::EventType::BOUNCE_RIGHT);
                 
             }else
             {
-                scrollTo(T::TScrollView::EventType::SCROLLING_DONE);
+                scrollTo(TScrollView::EventType::SCROLLING_DONE);
             }
             break;
     }
@@ -698,7 +703,7 @@ void TScrollView::addEventListener(const tScrollViewCallback &callback)
 }
 
 
-void TScrollView::scrollTo(T::TScrollView::EventType event)
+void TScrollView::scrollTo(TScrollView::EventType event)
 {
 //    this->retain();
     
@@ -728,7 +733,7 @@ void TScrollView::moveToNext()
     
     _container->runAction(Sequence::create(MoveTo::create(0.3f, Vec2(x_to, 0)),
                                            CallFunc::create(LAMBDA_FUNCTION_START
-                                                            this->scrollTo(T::TScrollView::EventType::ADJUST_DONE);
+                                                            this->scrollTo(TScrollView::EventType::ADJUST_DONE);
                                                             LAMBDA_FUNCTION_END),
                                            nullptr));
 }
@@ -744,7 +749,7 @@ void TScrollView::moveToPre()
     
     _container->runAction(Sequence::create(MoveTo::create(0.3f, Vec2(x_to, 0)),
                                            CallFunc::create(LAMBDA_FUNCTION_START
-                                                            this->scrollTo(T::TScrollView::EventType::ADJUST_DONE);
+                                                            this->scrollTo(TScrollView::EventType::ADJUST_DONE);
                                                             LAMBDA_FUNCTION_END),
                                            nullptr));
 }
@@ -759,7 +764,7 @@ void TScrollView::moveToCurPageOriginPos()
     
     _container->runAction(Sequence::create(MoveTo::create(0.3f, Vec2(x_to, 0)),
                                            CallFunc::create(LAMBDA_FUNCTION_START
-                                                            this->scrollTo(T::TScrollView::EventType::ADJUST_DONE);
+                                                            this->scrollTo(TScrollView::EventType::ADJUST_DONE);
                                                             LAMBDA_FUNCTION_END),
                                            nullptr));
 }
@@ -890,7 +895,7 @@ void TScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_
 }
 
 
-void T::TScrollView::setScrollViewBarEnable(bool enable)
+void TScrollView::setScrollViewBarEnable(bool enable)
 {
     _scrollBarEnabled = enable;
     
@@ -993,7 +998,7 @@ void TScrollView::setScrollBarAutoHideEnable(bool autoHideEnable)
     CCASSERT(_scrollBarEnabled, "Scroll bar should be enabled!");
     if(_verticalScrollBar != nullptr)
     {
-        _verticalScrollBar->setAutiHideEnable(autoHideEnable);
+        _verticalScrollBar->setAutoHideEnable(autoHideEnable);
     }
 
 }

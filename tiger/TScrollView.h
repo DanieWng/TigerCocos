@@ -14,7 +14,7 @@
 USING_NS_CC;
 
 
-namespace T
+namespace Tiger
 {
 
 class TScrollViewBar;
@@ -156,6 +156,8 @@ protected:
     CC_SYNTHESIZE_READONLY(bool, _isMoved, IsMoved);
     
     CC_SYNTHESIZE(float, _scrollSpeedFactor, AutoScrollSpeedFactor);
+    
+    CC_SYNTHESIZE(float, _vecticalMinEffectiveDistance, VecticalMinEffectiveDistance);
     
     LayerColor* _container;
     Size   _containerSize;

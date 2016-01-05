@@ -11,9 +11,7 @@
 
 #include "TScrollView.h"
 
-using namespace T;
-
-namespace T {
+namespace Tiger {
 
 class TScrollViewBar : public cocos2d::ProtectedNode
 {
@@ -32,7 +30,7 @@ public:
     void setWidth(float width);
     float getWidth() const;
     
-    void setAutiHideEnable(bool autoHideEnable);
+    void setAutoHideEnable(bool autoHideEnable) { _autoHideEnable = autoHideEnable; };
     
     bool isAutoHideEnable() const { return _autoHideEnable; }
     
