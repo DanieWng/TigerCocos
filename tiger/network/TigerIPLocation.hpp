@@ -15,9 +15,10 @@ namespace Tiger {
 
 enum class CountryType
 {
-    China,
-    Korea,
-    Other
+    cChina,
+    cKorea,
+    cOther,
+    cUnkown
 };
     
 struct IPResponeData
@@ -33,6 +34,21 @@ struct IPResponeData
     double      _latitude;
     double      _longitude;
     int         _metroCode;
+    
+    IPResponeData()
+    {
+        _ipAddress = "";
+        _countryCode = "";
+        _countryName = "";
+        _regionCode = "";
+        _regionName = "";
+        _city = "";
+        _zipCode = "";
+        _timeZone = "";
+        _latitude = 0.0f;
+        _longitude = 0.0f;
+        _metroCode = 0;
+    }
 };
     
 class TigerIPLocation
@@ -48,10 +64,17 @@ public:
     void startGetLocation();
     bool doneGetLocation(cocos2d::network::HttpResponse *response);
     
-    bool parseJson(const std::string json);
+    IPResponeData parseJson(const std::string json);
+    
+    typedef std::function<void(IPResponeData)> fIPLocationResultDelegate;
+    
+    void setResultDelegate(const fIPLocationResultDelegate d);
     
 private:
+    
     static TigerIPLocation* _instance;
+
+    fIPLocationResultDelegate _resultDelegate;
 };
 
 }

@@ -17,10 +17,12 @@ TigerIPLocation* TigerIPLocation::_instance = nullptr;
 
 TigerIPLocation::TigerIPLocation()
 {
+    _resultDelegate = nullptr;
 }
 
 TigerIPLocation::~TigerIPLocation()
 {
+    _resultDelegate = nullptr;
 }
 
 TigerIPLocation* TigerIPLocation::getInstance()
@@ -71,30 +73,38 @@ bool TigerIPLocation::doneGetLocation(cocos2d::network::HttpResponse *response)
     
     std::string data = "";
     std::vector<char>* v = response->getResponseData();
-    data = &(v->at(0));
+    for (int i=0; i<v->size(); i++)
+    {
+        data.append(cocos2d::__String::createWithFormat("%c", v->at(i))->getCString());
+    }
     
-    cocos2d::log("response data: %s", data.c_str());
+//    cocos2d::log("response data: %s", data.c_str());
     
-    parseJson(data);
+    IPResponeData ip_data = parseJson(data);
+    
+    if (_resultDelegate)
+    {
+        _resultDelegate(ip_data);
+    }
     
     TigerHttpClient::destoryInstance();
     
     return true;
 }
 
-bool TigerIPLocation::parseJson(const std::string json)
+IPResponeData TigerIPLocation::parseJson(const std::string json)
 {
+    IPResponeData data = IPResponeData();
+    
     Document document;
     
     document.Parse<0>(json.c_str());
     
     if (document.HasParseError())
     {
-        cocos2d::log("### json document parse error ###");
-        return false;
+        cocos2d::log("### json document parse error [%u]###", document.GetParseError());
+        return data;
     }
-    
-    IPResponeData data;
     
     if (document.IsObject())
     {
@@ -154,10 +164,13 @@ bool TigerIPLocation::parseJson(const std::string json)
         }
     }
     
-    return true;
+    return data;
 }
 
-
+void TigerIPLocation::setResultDelegate(const fIPLocationResultDelegate d)
+{
+    _resultDelegate = d;
+}
 
 
 
