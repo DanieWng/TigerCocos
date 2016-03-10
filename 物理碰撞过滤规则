@@ -1,3 +1,76 @@
+PhysicsBody相关API说明
+void setGroup(int group);
+      Collision groups let you specify an integral group index. 
+You can have all fixtures with the same group index always collide 
+(positive index) or never collide (negative index)
+      it have high priority than bit masks
+
+
+PhysicsBody的Group
+1.优先级比bit masks的优先级高(CategoryBitmask,ContactTestBitmask,CollisionBitmask)
+2.group是正数且相等的话，就一定碰撞
+3.group是负数且相等的话，就一定不会碰撞
+4.group其他情况没说，应该是取决于bit masks了
+void setCategoryBitmask(int bitmask);
+      A mask that defines which categories this physics body belongs to.
+      Every physics body in a scene can be assigned to up to 32 
+different categories, each corresponding to a bit in the bit mask. 
+You define the mask values used in your game. 
+In conjunction with the collisionBitMask and contactTestBitMask properties, 
+you define which physics bodies interact with each other 
+and when your game is notified of these interactions.
+      The default value is 0xFFFFFFFF (all bits set).
+
+
+PhysicsBody的CategoryBitmask
+1.CategoryBitmask用来标记这个PhysicsBody的所属类别
+2.每个PhysicsBody最多可以属于32个类别，一个bit代表一个类别，0代表不是对应类别，1代表是对应类别
+3.和另外两个属性(collisionBitMask and contactTestBitMask)配合着用
+4.默认值0xFFFFFFFF，即这个PhysicsBody分别属于所有的32个类别
+void setContactTestBitmask(int bitmask);
+      A mask that defines which categories of bodies cause intersection 
+notifications with this physics body.
+      When two bodies share the same space, each body’s category mask is 
+tested against the other body’s contact mask by performing a logical
+ AND operation. If either comparison results in a non-zero value, 
+an PhysicsContact object is created and passed to the physics 
+world’s delegate. For best performance, only set bits in the 
+contacts mask for interactions you are interested in.
+      The default value is 0x00000000 (all bits cleared).
+
+
+PhysicsBody的ContactTestBitmask
+1.ContactTestBitmask用来定义哪个类别的PhysicsBody可以和这个PhysicsBody产生相交通知
+2.举个例子：有PhysicsBody A B占了同样的空间了。如何判断A B要产生相交通知呢，
+if((A.CategoryBitmask & B.ContactTestBitmask) != 0 || (A.ContactTestBitmask & B.CategoryBitmask) != 0)
+    {/*条件成立，执行相交通知*/}
+else{/*没有相交通知*/}
+3.为了性能考虑，相交通知只应该设置给我们感兴趣的物体
+4.默认值0x00000000 (all bits cleared)，没有哪个类别的PhysicsBody可以产生相交通知
+void setCollisionBitmask(int bitmask);
+      A mask that defines which categories of physics bodies 
+can collide with this physics body.
+      When two physics bodies contact each other, a collision may occur. 
+This body’s collision mask is compared to the other body’s category 
+mask by performing a logical AND operation. If the result is a 
+non-zero value, then this body is affected by the collision. 
+Each body independently chooses whether it wants to be affected 
+by the other body. For example, you might use this to avoid collision 
+calculations that would make negligible changes to a body’s velocity.
+      The default value is 0xFFFFFFFF (all bits set).
+
+
+PhysicsBody的CollisionBitmask
+1.CollisionBitmask是用来定义哪个类别的PhysicsBody可以和这个PhysicsBody产生碰撞
+2.举个例子：有PhysicsBody A B彼此接触了，那碰撞就可能发生。
+A受不受这个碰撞的影响(体现为物理效果)表达为：
+if((A.CollisionBitmask & B.CategoryBitmask) != 0 ){/*A产生碰撞的物理效果*/} 
+else{/*A没效果*/}
+3.至于B受不受这个碰撞的影响，则采用同样的表达式单独计算即可
+if((B.CollisionBitmask & A.CategoryBitmask) != 0 ){/*B产生碰撞的物理效果*/} 
+else{/*B没效果*/}
+4.默认值0xFFFFFFFF (all bits set)，所有类别的PhysicsBody都能对this body产生碰撞效果
+
 PhysicsBody a;
 PhysicsBody b;
 
