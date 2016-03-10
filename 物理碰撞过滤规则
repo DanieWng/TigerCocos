@@ -1,0 +1,33 @@
+PhysicsBody a;
+PhysicsBody b;
+
+if ((a.group == b.group) && a.group > 0) {
+    /*能碰撞，有碰撞的物理效果*/
+    if (((a.CategoryBitmask & b.ContactTestBitmask) != 0)
+            || ((a.ContactTestBitmask & b.CategoryBitmask) != 0)) {
+        /*条件成立，执行相交通知*/
+    }
+} else if ((a.group == b.group) && a.group < 0) {
+    /*不能碰撞，没有碰撞的物理效果*/
+} else {
+    if ((a.CollisionBitmask & b.CategoryBitmask) != 0) {
+        /*a能碰撞，a有碰撞的物理效果*/
+        if (((a.CategoryBitmask & b.ContactTestBitmask) != 0)
+                || ((a.ContactTestBitmask & b.CategoryBitmask) != 0)) {
+            /*条件成立，执行相交通知*/
+        }
+    } else {
+        /*a不能碰撞，a没有碰撞的物理效果*/
+    }
+
+    if ((b.CollisionBitmask & a.CategoryBitmask) != 0) {
+        /*b能碰撞，b有碰撞的物理效果*/
+        if (((a.CategoryBitmask & b.ContactTestBitmask) != 0)
+                || ((a.ContactTestBitmask & b.CategoryBitmask) != 0)) {
+            /*条件成立，执行相交通知*/
+        }
+    } else {
+        /*b不能碰撞，b没有碰撞的物理效果*/
+    }
+
+}
