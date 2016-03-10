@@ -1,4 +1,4 @@
-PhysicsBody相关API说明
+#PhysicsBody相关API说明
 void setGroup(int group);
       Collision groups let you specify an integral group index. 
 You can have all fixtures with the same group index always collide 
@@ -6,7 +6,7 @@ You can have all fixtures with the same group index always collide
       it have high priority than bit masks
 
 
-PhysicsBody的Group
+#PhysicsBody的Group
 1.优先级比bit masks的优先级高(CategoryBitmask,ContactTestBitmask,CollisionBitmask)
 2.group是正数且相等的话，就一定碰撞
 3.group是负数且相等的话，就一定不会碰撞
