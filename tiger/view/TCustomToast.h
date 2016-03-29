@@ -10,7 +10,6 @@
 #define __TheSolarSystem__CustomToast__
 
 #include <stdio.h>
-
 #include "cocos2d.h"
 #include "TigerMacros.h"
 

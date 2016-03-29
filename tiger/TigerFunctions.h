@@ -13,99 +13,29 @@
 #include "TCustomToast.h"
 #include <ui/CocosGUI.h>
 #include "TigerEnum.h"
+#include "TigerMacros.h"
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+#include "native/java/TigerJNICalls.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+#include "native/objectc/TigerObjectCCalls.h"
+#endif
 
 using namespace cocos2d::ui;
 USING_NS_CC;
 
-namespace T
+namespace Tiger
 {
-    inline void setPosAndAnchorPointAndTag(Ref* target, Vec2 pos, Vec2 anchor, int tag)
+    inline void imageSaveToPhotoAlbum(const std::string file)
     {
-        auto t = (Node*)target;
-        t->setPosition(pos);
-        t->setAnchorPoint( anchor );
-        t->setTag(tag);
+        #if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+            TigerObjectCCalls::trySaveImageToPhotoAlbum(file.c_str());
+        #elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            
+        #endif
     }
     
-    inline void setTalkNodePosAndAnchorPoint(Sprite* talk, Vec2 pos, float startYInNodeSpace, float anchorX = 0)
-    {
-        talk->setPosition( Vec2(pos.x, pos.y - startYInNodeSpace) );
-        
-        float anchor_y;
-        
-        anchor_y = startYInNodeSpace / talk->getContentSize().height;
-        
-        talk->setAnchorPoint( Vec2(anchorX, 1 - anchor_y) );
-    }
-    
-    inline void setTalkNodePosAndAnchorPointTopBottomMode(Node* talk, Vec2 pos, float startXInNodeSpace, float anchorY = 0)
-    {
-        talk->setPosition( Vec2(pos.x + startXInNodeSpace, pos.y) );
-        
-        float anchor_x = startXInNodeSpace / talk->getContentSize().width;
-        
-        talk->setAnchorPoint( Vec2(anchor_x, anchorY) );
-    }
-    
-    inline ActionInterval* callTalkShowAction()
-    {
-        auto action = Spawn::create(EaseBackOut::create(ScaleTo::create(0.5f, 1.0f)),
-                                    FadeTo::create(0.5f, 255),
-                                    nullptr);
-        
-        return action;
-    }
-    
-    inline ActionInterval* callTalkHideAction()
-    {
-        auto action = Spawn::create(EaseBackIn::create(ScaleTo::create(0.5f, 0.1f)),
-                                    FadeTo::create(0.5f, 0),
-                                    nullptr);
-        
-        return action;
-    }
-    
-    inline void removeUnusedTextureCache()
-    {
-        Director::getInstance()->getTextureCache()->removeUnusedTextures();
-    }
-    
-    inline void removeUnusedSpriteFrame()
-    {
-        SpriteFrameCache::getInstance()->removeUnusedSpriteFrames();
-    }
-    
-    inline void destoreAnimationCache()
-    {
-        AnimationCache::getInstance()->destroyInstance();
-    }
-    
-    inline void removeAllSpriteFrame()
-    {
-        SpriteFrameCache::getInstance()->removeSpriteFrames();
-    }
-    
-    /**
-     SpriteFrameCache, TextureCache, FileCache...
-     */
-    inline void purgeDataCache()
-    {
-        Director::getInstance()->purgeCachedData();
-    }
-    
-    inline void clearMemory()
-    {
-        AnimationCache::destroyInstance();
-        SpriteFrameCache::getInstance()->removeUnusedSpriteFrames();
-        Director::getInstance()->getTextureCache()->removeUnusedTextures();
-    }
-    
-    inline void setMenuSelectImageColor(MenuItemSprite* item)
-    {
-        item->getSelectedImage()->setColor(cocos2d::Color3B(122, 122, 122));
-    }
-    
-    inline const std::string getCurrentDate()
+    inline std::string getCurrentDate()
     {
         struct tm* tm;
         time_t timep;
@@ -116,37 +46,179 @@ namespace T
         
         tm = localtime(&timep);
         int year = tm->tm_year + 1900;
-//        int month = tm->tm_mon + 1;
-//        int day = tm->tm_mday;
+        int month = tm->tm_mon + 1;
+        int day = tm->tm_mday;
+        //    int h = tm->tm_hour;
+        //    int m = tm->tm_min;
+        //    int s = tm->tm_sec;
+        
+        //        TLog("%d/%d/%d/day", year, month, day);
+        
+        return __String::createWithFormat("%d/%d/%d", year, month, day)->getCString();
+    }
+    
+    inline double getCurrentTime()
+    {
+        time_t timep;
+        
+        timeval tv;
+        gettimeofday(&tv, nullptr);
+        timep = tv.tv_sec;
+        
+        return timep;
+    }
+    
+    inline std::string getCurYear()
+    {
+        struct tm* tm;
+        time_t timep;
+        
+        timeval tv;
+        gettimeofday(&tv, nullptr);
+        timep = tv.tv_sec;
+        
+        tm = localtime(&timep);
+        int year = tm->tm_year + 1900;
         
         return __String::createWithFormat("%d", year)->getCString();
     }
     
-    inline void showToast(const std::string& msg, Node* parent)
+    inline std::string translateToDate(double sec)
     {
-        auto toast = CustomToast::create(msg);
-        parent->addChild(toast, 100);
-        toast->show();
+        struct tm* tm;
+        
+        time_t timep = sec;
+        tm = localtime(&timep);
+        int year = tm->tm_year + 1900;
+        int month = tm->tm_mon + 1;
+        int day = tm->tm_mday;
+        
+        return __String::createWithFormat("%d / %d / %d", year, month, day)->getCString();
     }
     
-//    inline std::string getFullPath(const std::string& path)
-//    {
-//        
-//        std::string p="";
-//        
-//        if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID &&
-//            app::AppConfig::getInstance()->getAndroidMarket() == ANDROID_MARKET::GOOGLE)
-//        {
-//            p.append(FileUtils::getInstance()->getWritablePath()).append(path);
-//        }else
-//        {
-//            p.append(path);
-//        }
-//
-//        return p;
-//
-//    }
+    inline void checkWritablePathIsInside()
+    {
+        bool is_exist_write_path = false;
+        
+        auto search_paths = FileUtils::getInstance()->getSearchPaths();
+        
+        for (auto path : search_paths)
+        {
+            TLog("search path [%s]", path.c_str());
+            
+            if (path == FileUtils::getInstance()->getWritablePath())
+            {
+                is_exist_write_path = true;
+            }
+        }
+        
+        if (!is_exist_write_path)
+        {
+            FileUtils::getInstance()->addSearchPath(FileUtils::getInstance()->getWritablePath());
+            
+            TLog("added search path");
+        }
+    }
     
+    inline std::string computeDaysAboutLastFlight(double lastFlightDate)
+    {
+        time_t cur_time;
+        timeval tv;
+        gettimeofday(&tv, nullptr);
+        cur_time = tv.tv_sec;
+        
+        double diff = cur_time - lastFlightDate;
+        
+        // day
+        double min   = diff / 60;
+        double hour  = min / 60;
+        double day   = hour / 24;
+        //        double month = day / 30;
+        double year  = day / 365;
+        
+        std::string time_str;
+        
+        if (min < 60)
+        {
+            time_str = __String::createWithFormat("%d mins", (int)min)->getCString();
+        }else if (hour >= 1 && hour < 24)
+        {
+            time_str = __String::createWithFormat("%d hours", (int)hour)->getCString();
+        }else if (day >= 1 && day <= 365)
+        {
+            time_str = __String::createWithFormat("%d days", (int)day)->getCString();
+        }else if (year >= 1)
+        {
+            time_str = __String::createWithFormat("%d years", (int)year)->getCString();
+        }
+        
+        return time_str;
+    }
+    
+    inline int computeDaysWithLastDate(double lastDate)
+    {
+        time_t cur_time;
+        timeval tv;
+        gettimeofday(&tv, nullptr);
+        cur_time = tv.tv_sec;
+        
+        double diff = cur_time - lastDate;
+        
+        // day
+        double min   = diff / 60;
+        double hour  = min / 60;
+        double day   = hour / 24;
+        
+        return day;
+    }
+    
+    inline void setPosAndAnchorPointAndTag(Ref* target, Vec2 pos, Vec2 anchor, int tag)
+    {
+        auto t = (Node*)target;
+        t->setPosition(pos);
+        t->setAnchorPoint( anchor );
+        t->setTag(tag);
+    }
+    
+    inline void setPosBaseRetina(Ref* target, const Vec2 pos, const Vec2 anchor, float sceneScale, bool isToLayer=true)
+    {
+        Size visible_size = Director::getInstance()->getVisibleSize();
+        
+        float dif_x = 0.0f;
+        
+        if (isToLayer)
+        {
+            if (visible_size.width > (2048 * sceneScale))
+            {
+                dif_x = (visible_size.width - (2048 * sceneScale)) / 2.0f;
+            }
+        }
+        
+        auto t = (Node*)target;
+        t->setPosition(Vec2(pos.x * sceneScale + dif_x, pos.y * sceneScale));
+        t->setAnchorPoint(anchor);
+    }
+    
+    /**
+     dynamicConvertWorldPosBaseRetina
+     转换世界坐标，基于retina， 锚点是vec2（0， 0）
+     */
+    inline Vec2 dynamicConvertWorldPosBaseRetina(const Vec2 p, float sceneScale)
+    {
+        Size visible_size = Director::getInstance()->getVisibleSize();
+        
+        float dif_x = 0.0f;
+        
+        if (visible_size.width > (2048 * sceneScale))
+        {
+            dif_x = (visible_size.width - (2048 * sceneScale)) / 2.0f;
+        }
+        
+        return Vec2(p.x * sceneScale + dif_x, p.y * sceneScale);
+    }
+    
+    /** 设置Button的enable值
+     */
     inline void setButtonIsEnable(Button *btn, bool isEnable)
     {
         if (isEnable)
@@ -162,7 +234,57 @@ namespace T
         }
     }
     
+    inline Button* createButton(const std::string& normal,
+                                const std::string& select,
+                                const std::string& disable,
+                                const cocos2d::ui::AbstractCheckButton::ccWidgetTouchCallback &callback=nullptr,
+                                Widget::TextureResType resType=Widget::TextureResType::LOCAL)
+    {
+        auto btn = Button::create(normal, select, disable, resType);
+        if (callback)
+        {
+            btn->addTouchEventListener(callback);
+        }
+        
+        return btn;
+    }
     
+    /**
+     In android, the data file must in writeable path. If not, can open the data file.
+     @parma filePath ex:"asset/xxx.sqlite"
+     @parma fileName ex:"xxx.sqlite"
+     */
+    inline void copyFileToSave(const std::string& assetPath, const std::string& saveTo)
+    {
+        // Check is file exist in resources folder.
+        CCASSERT(FileUtils::getInstance()->isFileExist(assetPath), "");
+        
+        if (FileUtils::getInstance()->isFileExist(saveTo))
+            FileUtils::getInstance()->removeFile(saveTo);
+        
+        // Create file in writeable path.
+        FILE* out_file = fopen(saveTo.c_str(), "r");
+        if (out_file == nullptr)
+        {
+            // Get data from DB file.
+            ssize_t size;
+            const char* data = (char*)cocos2d::FileUtils::getInstance()->getFileData(assetPath.c_str(),
+                                                                                     "rb",
+                                                                                     &size);
+            
+            // Ready wirte data into the out file.
+            out_file = fopen(saveTo.c_str(), "wb");
+            
+            // Write data into file.
+            fwrite(data, size, 1, out_file);
+            
+            CC_SAFE_DELETE_ARRAY(data);
+        }
+        
+        fclose(out_file);
+        
+        TLog("\n-- copy to [%s] --", saveTo.c_str());
+    }
     
 }
 

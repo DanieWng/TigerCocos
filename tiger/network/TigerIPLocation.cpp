@@ -9,7 +9,9 @@
 #include "TigerIPLocation.hpp"
 #include "../cocos2d/external/json/rapidjson.h"
 #include "../cocos2d/external/json/document.h"
+#include "cocos2d.h"
 
+USING_NS_CC;
 using namespace Tiger;
 using namespace rapidjson;
 

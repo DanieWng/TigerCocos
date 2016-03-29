@@ -42,7 +42,8 @@ _curPageIndex(0),
 _isMoved(false),
 _container(nullptr),
 _clippingToBounds(false),
-_scissorRestored(false)
+_scissorRestored(false),
+_isTouchEnable(true)
 {
     setTopBottomMargin(0.0f);
     setLeftRightMargin(0.0f);
@@ -51,11 +52,12 @@ _scissorRestored(false)
     _verticalScrollBar = nullptr;
     
     _vecticalMinEffectiveDistance = MIN_EFFECTIVE_DISTANCE_TO_MOVE;
+    _horizontalMinEffectDistance = MIN_EFFECTIVE_DISTANCE_TO_MOVE;
 }
 
 TScrollView::~TScrollView()
 {
-    TLog("TScrollView::~TScrollView()");
+//    TLog("TScrollView::~TScrollView()");
     
     setTouchEnable(false);
     _verticalScrollBar = nullptr;
@@ -146,14 +148,14 @@ void TScrollView::addItem(cocos2d::Node *item)
     _container->addChild(item);
 }
 
-void TScrollView::setContentOffset(cocos2d::Vec2 offset, bool isAnim)
+void TScrollView::setContentOffset(cocos2d::Vec2 offset, bool isAnim, float timer)
 {
     if (!isAnim)
     {
         _container->setPosition(offset);
     }else
     {
-        _container->runAction(MoveTo::create(1.0f, offset));
+        _container->runAction(MoveTo::create(timer, offset));
     }
     
     _offset = offset;
@@ -195,9 +197,17 @@ void TScrollView::moveToRight()
 }
 /*--------------------------------------------------*/
 
-void TScrollView::setTouchEnable(bool enabled)
+void TScrollView::setTouchListenerSwallow(bool isSwallow)
 {
-    if (!enabled)
+    if (_touchListener)
+    {
+        _touchListener->setSwallowTouches(isSwallow);
+    }
+}
+
+void TScrollView::setTouchListenerEnable(bool enable)
+{
+    if (!enable)
     {
         _eventDispatcher->removeEventListener(_touchListener);
         _touchListener = nullptr;
@@ -216,7 +226,13 @@ void TScrollView::setTouchEnable(bool enabled)
         
         _eventDispatcher->addEventListenerWithSceneGraphPriority(_touchListener, this);
     }
+}
+
+void TScrollView::setTouchEnable(bool enable)
+{
+    _isTouchEnable = enable;
     
+    this->setTouchListenerEnable(enable);
 }
 
 void TScrollView::recordSlidTime(float dt)
@@ -403,11 +419,16 @@ void TScrollView::startAutoScrollChildrenWithOriginalSpeed(const cocos2d::Vec2 &
     _autoScrollDir = dir;
     _autoScrollOriginalSpeed = v;
     
-    TLog("auto scroll original speed[%f]", v);
+//    TLog("auto scroll original speed[%f]", v);
 }
 
 bool TScrollView::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {
+    if (!_isTouchEnable)
+    {
+        return false;
+    }
+    
     _touchBeganInPosition = touch->getLocation();
     auto touchBeganInNodeSpace = this->convertToNodeSpace(_touchBeganInPosition);
     
@@ -439,7 +460,6 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
     
     if (_direction == Direction::VERTICAL)
     {
-        // fabsf(_lastDelta.y) < 2.0f
         if (fabsf(_touchMovedInPosition.y - _touchBeganInPosition.y) < _vecticalMinEffectiveDistance)
         {
             return;
@@ -457,13 +477,12 @@ void TScrollView::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
         
     }else if (_direction == Direction::HORIZONTAL)
     {
-        if (fabsf(_lastDelta.x) < MIN_EFFECTIVE_DISTANCE_TO_MOVE)
+        if (fabsf(_touchMovedInPosition.x - _touchBeganInPosition.x) < _horizontalMinEffectDistance)
         {
             return;
         }else
         {
             _offset.x += _lastDelta.x;
-            
             _isMoved = true;
         }
     }
@@ -498,15 +517,15 @@ void TScrollView::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
             if (fabsf(_lastDelta.y) > MIN_EFFECTIVE_DISTANCE_TO_SLID / 2.0f)
             {
                 _autoScroll = true;
-                TLog("TScrollView::onTouchEnded --> auto scroll is true [Vertical]");
+//                TLog("TScrollView::onTouchEnded --> auto scroll is true [Vertical]");
             }
             break;
             
         case HORIZONTAL:
-            if (fabsf(_lastDelta.x) > MIN_EFFECTIVE_DISTANCE_TO_SLID)
+            if (fabsf(_lastDelta.x) > _horizontalMinEffectDistance / 2.0f)
             {
                 _autoScroll = true;
-                TLog("TScrollView::onTouchEnded --> auto scroll is true [Horizontal]");
+//                TLog("TScrollView::onTouchEnded --> auto scroll is true [Horizontal]");
             }
             break;
     }
@@ -724,7 +743,7 @@ void TScrollView::computePageIndex()
 
 void TScrollView::moveToNext()
 {
-    TLog("TScrollView::moveToNext");
+//    TLog("TScrollView::moveToNext");
     
     _curPageIndex++;
     float x_to = -(_frameRect.size.width * _curPageIndex);
@@ -740,7 +759,7 @@ void TScrollView::moveToNext()
 
 void TScrollView::moveToPre()
 {
-    TLog("TScrollView::moveToPre()");
+//    TLog("TScrollView::moveToPre()");
     
     _curPageIndex--;
     float x_to = -(_frameRect.size.width * _curPageIndex);
@@ -756,7 +775,7 @@ void TScrollView::moveToPre()
 
 void TScrollView::moveToCurPageOriginPos()
 {
-    TLog("TScrollView::moveToCurPageOriginPos()");
+//    TLog("TScrollView::moveToCurPageOriginPos()");
     
     float x_to = -_frameRect.size.width * _curPageIndex;
     

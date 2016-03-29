@@ -11,16 +11,17 @@
 
 #include "sqlite3.h"
 #include <string>
+#include <stdio.h>
 
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 #include <unordered_map>
 #include <vector>
 #endif
 
-#define DB_FILE_NAME            "testFF.sqlite"
-#define DB_FILE_RES_PATH        "db/testFF.sqlite"
+#define DB_FILE_NAME            "plane.sqlite"
+#define DB_FILE_RES_PATH        "db/plane.sqlite"
 
-#define DB_PATH FileUtils::getInstance()->getWritablePath() + DB_FILE_NAME
+#define DB_FILE_FOLDER FileUtils::getInstance()->getWritablePath()+"/db/"
 
 struct SqliteQueryData
 {
@@ -48,7 +49,7 @@ public:
     
     void updateWithSQL(const std::string& sql);
     
-    void copyDateFileToWriteablePath(const std::string& filePath, const std::string& fileName);
+    void copyDateFileToWriteablePath(const std::string& assetPath, const std::string& saveTo);
     
     void insertData(const std::string& sql);
     

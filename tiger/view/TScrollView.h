@@ -90,7 +90,7 @@ public:
     void addItem(Node* item);
     
     // About Scroll View Offset method.
-    void setContentOffset(Vec2 offset, bool isAnim=false);
+    void setContentOffset(Vec2 offset, bool isAnim=false, float timer=1.0f);
     Vec2 getContentOffset() { return _offset; };
     
     void moveToTop();
@@ -106,8 +106,9 @@ public:
     virtual void onTouchMoved(Touch* touch, Event* event) override;
     virtual void onTouchEnded(Touch* touch, Event* event) override;
     
-    void setTouchEnable(bool enabled);
-    bool getIsTouchEnable() { return _touchListener != nullptr; };
+    void setTouchListenerSwallow(bool isSwallow);
+    void setTouchListenerEnable(bool enable);
+    void setTouchEnable(bool enable);
     
     /**
      Add call back function called scroll view event triggered.
@@ -159,6 +160,8 @@ protected:
     
     CC_SYNTHESIZE(float, _vecticalMinEffectiveDistance, VecticalMinEffectiveDistance);
     
+    CC_SYNTHESIZE(float, _horizontalMinEffectDistance, HorizontalMinEffectiveDistance);
+    
     LayerColor* _container;
     Size   _containerSize;
     
@@ -190,6 +193,8 @@ protected:
     float  _bounceOriginalSpeed;
     
     tScrollViewCallback _eventCallback;
+    
+    bool _isTouchEnable;
     
 protected:
     

@@ -9,7 +9,7 @@
 #include "TigerSqliteUtil.h"
 #include "TigerMacros.h"
 #include "cocos2d.h"
-
+#include "../TigerFunctions.h"
 
 USING_NS_CC;
 
@@ -33,10 +33,15 @@ TigerSqliteUtil* TigerSqliteUtil::getInstance()
         _instance = new (std::nothrow)TigerSqliteUtil();
         
         // 检查db文件是否在可读写目录内，不是的话，复制移动db文件
-        if (!FileUtils::getInstance()->isFileExist(FileUtils::getInstance()->getWritablePath()+DB_FILE_NAME))
+        if (!FileUtils::getInstance()->isFileExist(DB_FILE_FOLDER+DB_FILE_NAME))
         {
+            if (!FileUtils::getInstance()->isDirectoryExist(DB_FILE_FOLDER))
+            {
+                FileUtils::getInstance()->createDirectory(DB_FILE_FOLDER);
+            }
+            
             _instance->copyDateFileToWriteablePath(FileUtils::getInstance()->fullPathForFilename(DB_FILE_RES_PATH),
-                                                   DB_FILE_NAME);
+                                                   DB_FILE_FOLDER+DB_FILE_NAME);
         }
     }
     
@@ -134,44 +139,14 @@ void TigerSqliteUtil::deleteData(const std::string &sql)
  @parma filePath ex:"asset/xxx.sqlite"
  @parma fileName ex:"xxx.sqlite"
  */
-void TigerSqliteUtil::copyDateFileToWriteablePath(const std::string& filePath, const std::string& fileName)
+void TigerSqliteUtil::copyDateFileToWriteablePath(const std::string& assetPath, const std::string& saveTo)
 {
-    std::string db_in_writeable = cocos2d::StringUtils::format("%s%s",
-                                                               cocos2d::FileUtils::getInstance()->getWritablePath().c_str(),
-                                                               fileName.c_str());
-    
-    TLog("db_in_writeable path: %s", db_in_writeable.c_str());
-    
     // Check is file exist in writeable path.
-    if (!cocos2d::FileUtils::getInstance()->isFileExist(db_in_writeable))
+    if (!cocos2d::FileUtils::getInstance()->isFileExist(saveTo))
     {
         TLog("-- The DB file is not exist in writeable path --");
         
-        // Check is file exist in resources folder.
-        CCASSERT(filePath.c_str(), "");
-        
-        // Create file in writeable path.
-        FILE* out_file = fopen(db_in_writeable.c_str(), "r");
-        if (out_file == nullptr)
-        {
-            // Get data from DB file.
-            ssize_t size;
-            const char* data = (char*)cocos2d::FileUtils::getInstance()->getFileData(filePath.c_str(),
-                                                                                     "rb",
-                                                                                     &size);
-            
-            // Ready wirte data into the out file.
-            out_file = fopen(db_in_writeable.c_str(), "wb");
-            
-            // Write data into file.
-            fwrite(data, size, 1, out_file);
-            
-            CC_SAFE_DELETE_ARRAY(data);
-        }
-        
-        fclose(out_file);
-        
-        TLog("-- The DB file[%s] copy into writeable path --", fileName.c_str());
+        Tiger::copyFileToSave(assetPath, saveTo);
     }
     
 }
