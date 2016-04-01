@@ -11,6 +11,11 @@
 
 #include <network/HttpClient.h>
 
+using namespace cocos2d::network;
+
+#define HTTP_ERROR_TIME_OUT -1
+
+
 namespace Tiger
 {
     class TigerHttpClient
@@ -27,7 +32,12 @@ namespace Tiger
         
         void setResponseDelegate(fHttpResponseDelegate d);
         
-        void requestGet(const std::string url);
+        void requestGet();
+        void requestPost();
+        
+        void setUrl(const std::string& url);
+        void setHeaders(std::vector<std::string> headers);
+        void setPostData(const std::string& data);
         
     protected:
         
@@ -40,7 +50,15 @@ namespace Tiger
         static TigerHttpClient* _instance;
         
         fHttpResponseDelegate _responseDelegate;
+        
+        std::string _url;
+        std::vector<std::string> _headers;
+        std::string _postData;
     };
 }
 
 #endif /* TigerHttpClient_hpp */
+
+
+
+

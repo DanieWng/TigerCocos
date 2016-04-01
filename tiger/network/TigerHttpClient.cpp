@@ -9,13 +9,16 @@
 #include "TigerHttpClient.hpp"
 
 using namespace Tiger;
-using namespace cocos2d::network;
+
 
 TigerHttpClient* TigerHttpClient::_instance = nullptr;
 
 TigerHttpClient::TigerHttpClient()
 {
     _responseDelegate = nullptr;
+    
+    _url = "";
+    _headers.clear();
 }
 
 TigerHttpClient::~TigerHttpClient()
@@ -47,12 +50,17 @@ void TigerHttpClient::setResponseDelegate(fHttpResponseDelegate d)
     _responseDelegate = d;
 }
 
-void TigerHttpClient::requestGet(const std::string url)
+void TigerHttpClient::requestGet()
 {
     HttpRequest *request = new HttpRequest();
     
     request->setRequestType(cocos2d::network::HttpRequest::Type::GET);
-    request->setUrl(url.c_str());
+    request->setUrl(_url.c_str());
+    
+    if (_headers.size() > 0)
+    {
+        request->setHeaders(_headers);
+    }
     
     request->setResponseCallback(CC_CALLBACK_2(TigerHttpClient::onHttpResponse, this));
     
@@ -61,12 +69,32 @@ void TigerHttpClient::requestGet(const std::string url)
     request->release();
 }
 
+void TigerHttpClient::requestPost()
+{
+    
+}
+
 void TigerHttpClient::onHttpResponse(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response)
 {
     if (_responseDelegate)
     {
         _responseDelegate(response);
     }
+}
+
+void TigerHttpClient::setUrl(const std::string &url)
+{
+    _url = url;
+}
+
+void TigerHttpClient::setHeaders(std::vector<std::string> headers)
+{
+    _headers = headers;
+}
+
+void TigerHttpClient::setPostData(const std::string &data)
+{
+    _postData = data;
 }
 
 

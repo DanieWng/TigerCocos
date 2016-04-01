@@ -9,9 +9,7 @@
 #include "TigerIPLocation.hpp"
 #include "../cocos2d/external/json/rapidjson.h"
 #include "../cocos2d/external/json/document.h"
-#include "cocos2d.h"
 
-USING_NS_CC;
 using namespace Tiger;
 using namespace rapidjson;
 
@@ -50,7 +48,8 @@ void TigerIPLocation::startGetLocation()
 {
     auto http_client = TigerHttpClient::getInstance();
     http_client->setResponseDelegate(CC_CALLBACK_1(TigerIPLocation::doneGetLocation, this));
-    http_client->requestGet("http://freegeoip.net/json/");
+    http_client->setUrl("https://freegeoip.net/json/"); // the url is derparture
+    http_client->requestGet();
 }
 
 bool TigerIPLocation::doneGetLocation(cocos2d::network::HttpResponse *response)
@@ -61,15 +60,18 @@ bool TigerIPLocation::doneGetLocation(cocos2d::network::HttpResponse *response)
         return false;
     }
     
-    int status_code = response->getResponseCode();
+    int status_code = (int)response->getResponseCode();
     char status_string[64] = {};
     sprintf(status_string, "Http Status Code: %d, tag = %s", status_code, response->getHttpRequest()->getTag());
     cocos2d::log("response code: %s", status_string);
+    
+    IPResponeData ip_data = IPResponeData();
     
     if (!response->isSucceed())
     {
         cocos2d::log("response failed");
         cocos2d::log("error buffer: %s", response->getErrorBuffer());
+        _resultDelegate(ip_data);
         return false;
     }
     
@@ -82,7 +84,7 @@ bool TigerIPLocation::doneGetLocation(cocos2d::network::HttpResponse *response)
     
 //    cocos2d::log("response data: %s", data.c_str());
     
-    IPResponeData ip_data = parseJson(data);
+    ip_data = parseJson(data);
     
     if (_resultDelegate)
     {
