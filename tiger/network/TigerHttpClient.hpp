@@ -23,7 +23,7 @@ namespace Tiger
     public:
         
         static TigerHttpClient* getInstance();
-        static void destoryInstance();
+        void destoryInstance();
         
         TigerHttpClient();
         virtual ~TigerHttpClient();
@@ -34,6 +34,7 @@ namespace Tiger
         
         void requestGet();
         void requestPost();
+        void requestPut();
         
         void setUrl(const std::string& url);
         void setHeaders(std::vector<std::string> headers);

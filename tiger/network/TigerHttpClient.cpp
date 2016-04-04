@@ -71,7 +71,44 @@ void TigerHttpClient::requestGet()
 
 void TigerHttpClient::requestPost()
 {
+    HttpRequest *request = new HttpRequest();
     
+    request->setRequestType(cocos2d::network::HttpRequest::Type::POST);
+    request->setUrl(_url.c_str());
+    
+    if (_headers.size() > 0)
+    {
+        request->setHeaders(_headers);
+    }
+    
+    request->setRequestData(_postData.c_str(), strlen(_postData.c_str()));
+    
+    request->setResponseCallback(CC_CALLBACK_2(TigerHttpClient::onHttpResponse, this));
+    
+    HttpClient::getInstance()->send(request);
+    
+    request->release();
+}
+
+void TigerHttpClient::requestPut()
+{
+    HttpRequest *request = new HttpRequest();
+    
+    request->setRequestType(cocos2d::network::HttpRequest::Type::PUT);
+    request->setUrl(_url.c_str());
+    
+    if (_headers.size() > 0)
+    {
+        request->setHeaders(_headers);
+    }
+    
+    request->setRequestData(_postData.c_str(), strlen(_postData.c_str()));
+    
+    request->setResponseCallback(CC_CALLBACK_2(TigerHttpClient::onHttpResponse, this));
+    
+    HttpClient::getInstance()->send(request);
+    
+    request->release();
 }
 
 void TigerHttpClient::onHttpResponse(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response)

@@ -91,7 +91,7 @@ bool TigerIPLocation::doneGetLocation(cocos2d::network::HttpResponse *response)
         _resultDelegate(ip_data);
     }
     
-    TigerHttpClient::destoryInstance();
+    TigerHttpClient::getInstance()->destoryInstance();
     
     return true;
 }
