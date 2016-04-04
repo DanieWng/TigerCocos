@@ -10,12 +10,7 @@
 #define TigerMoreAppsVersionUtil_hpp
 
 #include "TigerHttpClient.hpp"
-
-#define VERSION_URL "https://moreapps.oss-cn-beijing.aliyuncs.com/version.json"
-
-#define VERSION_JSON_MEMBER_VERSION             "version"
-#define VERSION_JSON_MEMBER_LAST_RELEASE_DATE   "last_app_release_date"
-#define VERSION_JSON_MEMBER_NEW_DOWNLOAD_URL    "last_version_res_download"
+#include "../../AppData.h"
 
 namespace Tiger
 {

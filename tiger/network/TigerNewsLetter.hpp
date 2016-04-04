@@ -10,10 +10,7 @@
 #define TigerNewsLetter_hpp
 
 #include "TigerHttpClient.hpp"
-
-#define MAILCHIMP_API_KEY           "bdf6a552cb169bed9847d832db371cc3-us5"
-#define MAILCHIMP_DATA_CENTER_CODE  "us5"
-#define YFACTORYAPPS_LIST_ID        "b4daaa9f44"
+#include "../../AppData.h"
 
 #define MAILCHIMP_API_ERROR_401 401
 #define MAILCHIMP_API_ERROR_400 400
