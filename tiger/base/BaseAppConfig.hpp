@@ -14,6 +14,7 @@
 #include "TigerMoreAppsVersionUtil.hpp"
 
 #define DEBUG_SHOW 1
+#define APP_RELEASE_DATE 1459746912
 
 USING_NS_CC;
 
@@ -48,12 +49,13 @@ protected:
     
     CC_SYNTHESIZE(Tiger::VersionData, _curVersionData, CurVersionData);
     
-    CC_SYNTHESIZE(bool, _isDownloadedMoreApps, IsDownloadedMoreApps);
+    CC_SYNTHESIZE_READONLY(std::string, _moreappsPath, MoreAppsPath);
+    
+    CC_SYNTHESIZE(unsigned int, _lastConnectDate, LastConnectServerData);
     
 private:
     
     static BaseAppConfig* _instance;
-    
     
 };
 

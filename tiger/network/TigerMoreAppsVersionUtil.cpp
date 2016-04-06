@@ -10,6 +10,7 @@
 #include <external/json/rapidjson.h>
 #include <external/json/document.h>
 #include "BaseAppConfig.hpp"
+#include "../TigerFunctions.h"
 
 using namespace Tiger;
 using namespace rapidjson;
@@ -111,10 +112,12 @@ void TigerMoreAppsVersionUtil::destoryInstance()
 TigerMoreAppsVersionUtil::TigerMoreAppsVersionUtil()
 {
     _isDownloading = false;
+    _statusdelegate = nullptr;
 }
 
 TigerMoreAppsVersionUtil::~TigerMoreAppsVersionUtil()
 {
+    _statusdelegate = nullptr;
 }
 
 void TigerMoreAppsVersionUtil::checkVersionBegan()
@@ -141,20 +144,37 @@ bool TigerMoreAppsVersionUtil::listenCheckVersionEnded(cocos2d::network::HttpRes
     
     CCLOG("\nresponse data: %s", data.c_str());
     
+    BaseAppConfig::getInstance()->setLastConnectServerData(Tiger::getCurrentTime());
+    BaseAppConfig::getInstance()->saveUserDefault();
+    
     auto new_version_data = parseJson(data.c_str());
+    
+    if (new_version_data._version == 0)
+    {
+        TLog("get version data faild");
+        return false;
+    }
+    
     auto cur_version_data = BaseAppConfig::getInstance()->getCurVersionData();
     
-    if (new_version_data._version > cur_version_data._version)
+    /*
+     1.if has a new version
+     2.check 'more apps' res floder is exist,
+     */
+    if (new_version_data._version > cur_version_data._version ||
+        !FileUtils::getInstance()->isDirectoryExist(MORE_APPS_ROOT_PATH))
     {
+        RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsHaveNewVersion);
+        
         // has new version, should get new
         BaseAppConfig::getInstance()->setCurVersionData(new_version_data);
-        BaseAppConfig::getInstance()->setIsDownloadedMoreApps(false);
         BaseAppConfig::getInstance()->saveUserDefault();
         
         downloadMoreAppsBegan();
-    }else
+    }
+    else
     {
-        destoryInstance();
+        RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsLastVersion);
     }
     
     return true;
@@ -214,6 +234,8 @@ void TigerMoreAppsVersionUtil::downloadMoreAppsBegan()
     http_client->setResponseDelegate(CC_CALLBACK_1(TigerMoreAppsVersionUtil::listenDownloadMoreAppsEnded, this));
     
     http_client->requestGet();
+    
+    RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsDownloadBegan);
 }
 
 void TigerMoreAppsVersionUtil::listenDownloadMoreAppsEnded(cocos2d::network::HttpResponse *response)
@@ -222,10 +244,13 @@ void TigerMoreAppsVersionUtil::listenDownloadMoreAppsEnded(cocos2d::network::Htt
     
     if (!checkResponseStatus(response))
     {
+        RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsDownloadError);
         return;
     }
     
-    std::string save_root = FileUtils::getInstance()->getWritablePath()+"moreapps/";
+    RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsUnzipBegan);
+    
+    std::string save_root = MORE_APPS_ROOT_PATH;
     
     std::string root_directory = unzip(&response->getResponseData()->at(0), response->getResponseData()->size(), save_root);
     
@@ -233,13 +258,17 @@ void TigerMoreAppsVersionUtil::listenDownloadMoreAppsEnded(cocos2d::network::Htt
     
     FileUtils::getInstance()->addSearchPath(save_root);
     
-    BaseAppConfig::getInstance()->setIsDownloadedMoreApps(true);
-    BaseAppConfig::getInstance()->saveUserDefault();
-    
     TLog("listenDownloadMoreAppsEnded -- unzip -> write to save [%s]", save_root.c_str());
+    
+    RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsDownloadNewResEnded);
+    
     destoryInstance();
 }
 
+void TigerMoreAppsVersionUtil::setDelegate(const fMoreAppsVersionStatusDelegate d)
+{
+    _statusdelegate = d;
+}
 
 
 

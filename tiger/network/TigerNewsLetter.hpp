@@ -12,9 +12,6 @@
 #include "TigerHttpClient.hpp"
 #include "../../AppData.h"
 
-#define MAILCHIMP_API_ERROR_401 401
-#define MAILCHIMP_API_ERROR_400 400
-
 namespace Tiger
 {
     struct NewsLetterMemberData

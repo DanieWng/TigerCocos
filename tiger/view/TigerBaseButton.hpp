@@ -1,6 +1,6 @@
 //
 //  TigerBaseButton.hpp
-//  FactoryAppAirplane
+//  Tiger
 //
 //  添加点击后的状态功能，并重新设置贴图
 //  Created by Wang zhen on 1/21/16.
@@ -19,22 +19,29 @@ class TigerBaseButton : public Button
 public:
     
     TigerBaseButton();
-    ~TigerBaseButton();
+    virtual ~TigerBaseButton();
     
     static TigerBaseButton* create(const std::string& normal,
                                    const std::string& select="",
                                    const std::string& disable="",
                                    Widget::TextureResType type=Widget::TextureResType::LOCAL);
     
-    bool initWithFile(const std::string& normal,
-                      const std::string& select,
-                      const std::string& disable,
-                      Widget::TextureResType type);
+    virtual bool initWithFile(const std::string& normal,
+                              const std::string& select,
+                              const std::string& disable,
+                              Widget::TextureResType type);
     
     void setIsSelected(bool isSelected);
     bool isSelected() { return _isSelected; };
     
-private:
+    void swapNormalAndSelectTextures();
+    
+    virtual void loadTextures(const std::string& normal,
+                         const std::string& select,
+                         const std::string& disable,
+                         Widget::TextureResType type);
+    
+protected:
     
     std::string _normalFile, _selectFile, _disableFile;
     
@@ -44,3 +51,14 @@ private:
 };
 
 #endif /* TigerBaseButton_hpp */
+
+
+
+
+
+
+
+
+
+
+

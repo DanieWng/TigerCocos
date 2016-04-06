@@ -43,6 +43,13 @@ enum class SwitchButtonType
     kOff
 };
 
+enum class LayerStatus
+{
+    kShow,
+    kHide
+};
+
+
 NS_T_END
 
 #endif

@@ -21,6 +21,10 @@
 #include "native/objectc/TigerObjectCCalls.h"
 #endif
 
+#include <iostream>
+#include <cstdlib>
+#include "md5.h"
+
 using namespace cocos2d::ui;
 USING_NS_CC;
 
@@ -33,6 +37,25 @@ namespace Tiger
         #elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
             
         #endif
+    }
+    
+    static inline std::string getMD5(const std::string str)
+    {
+        md5_state_t state;
+        md5_byte_t digest[16];
+        char hex_output[16*2 + 1];
+        int di;
+        
+        md5_init(&state);
+        md5_append(&state, (const md5_byte_t *)str.c_str(), (int)str.length());
+        md5_finish(&state, digest);
+        
+        for (di=0; di<16; ++di)
+        {
+            sprintf(hex_output + di*2, "%02x", digest[di]);
+        }
+        
+        return hex_output;
     }
     
     inline std::string getCurrentDate()

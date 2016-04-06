@@ -10,14 +10,10 @@
 #define TigerBasePopupLayer_hpp
 
 #include <cocos2d.h>
+#include "../TigerEnum.h"
 
 USING_NS_CC;
-
-enum class LayerStatus
-{
-    kShow,
-    kHide
-};
+USING_NS_T;
 
 typedef std::function<void(Ref*, LayerStatus)> fLayerStatusDelegate;
 

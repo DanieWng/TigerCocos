@@ -9,10 +9,6 @@
 #ifndef __Yoohoo__TigerMacros__
 #define __Yoohoo__TigerMacros__
 
-#define KEY_USERDEFAULT_IS_EXIST    "userdefault_is_exist"
-#define KEY_CUR_LANGUAGE            "cur_language"
-#define KEY_CUR_SOUND_ENABLE        "sound_enable"
-
 #define USING_NS_APP using namespace app
 #define NS_APP_BEGIN namespace app{
 #define NS_APP_END   }
@@ -56,6 +52,9 @@
 #define TEXTURE2D_USE_RGB565()      Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGB565)
 #define TEXTURE2D_USE_RGB888()      Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGB888)
 #define TEXTURE2D_USE_RGBA8888()    Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA8888)
+
+
+#define IF_NULL_THEN_RETUEN(_REF_, _RETURN_) if(_REF_ == nullptr) return _RETURN_
 
 
 #endif /* defined(__Yoohoo__TigerMacros__) */

@@ -1,6 +1,6 @@
 //
 //  TigerBaseButton.cpp
-//  FactoryAppAirplane
+//  Tiger
 //
 //  Created by Wang zhen on 1/21/16.
 //
@@ -76,8 +76,28 @@ void TigerBaseButton::setIsSelected(bool isSelected)
 }
 
 
+void TigerBaseButton::swapNormalAndSelectTextures()
+{
+    Button::loadTextures(_selectFile, _normalFile, _disableFile, _resType);
 
+    auto temp = _normalFile;
+    _normalFile = _selectFile;
+    _selectFile = temp;
+}
 
+void TigerBaseButton::loadTextures(const std::string& normal,
+                                   const std::string& select,
+                                   const std::string& disable,
+                                   Widget::TextureResType type)
+{
+    Button::loadTextures(normal, select, disable, type);
+    
+    _normalFile = normal;
+    _selectFile = select;
+    _disableFile = disable;
+    
+    _resType = type;
+}
 
 
 

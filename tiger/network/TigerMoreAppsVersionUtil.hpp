@@ -12,6 +12,8 @@
 #include "TigerHttpClient.hpp"
 #include "../../AppData.h"
 
+#define MORE_APPS_ROOT_PATH FileUtils::getInstance()->getWritablePath()+"moreapps/"
+
 namespace Tiger
 {
     struct VersionData
@@ -28,6 +30,16 @@ namespace Tiger
         }
     };
     
+    enum class MoreAppsVersionStatus
+    {
+        kIsLastVersion,
+        kIsHaveNewVersion,
+        kIsDownloadBegan,
+        kIsUnzipBegan,
+        kIsDownloadNewResEnded,
+        kIsDownloadError,
+    };
+    
     class TigerMoreAppsVersionUtil
     {
     public:
@@ -36,11 +48,14 @@ namespace Tiger
         ~TigerMoreAppsVersionUtil();
         
         static TigerMoreAppsVersionUtil* getInstance();
-        void destoryInstance();
+        static void destoryInstance();
         
         void checkVersionBegan();
         
         void downloadMoreAppsBegan();
+        
+        typedef std::function<void(MoreAppsVersionStatus)> fMoreAppsVersionStatusDelegate;
+        void setDelegate(const fMoreAppsVersionStatusDelegate d);
         
     private:
         
@@ -54,6 +69,8 @@ namespace Tiger
         static TigerMoreAppsVersionUtil* _instance;
         
         CC_SYNTHESIZE_READONLY(bool, _isDownloading, IsDownloading);
+        
+        fMoreAppsVersionStatusDelegate _statusdelegate;
     };
 };
 
