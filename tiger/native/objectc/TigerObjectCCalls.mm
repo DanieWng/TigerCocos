@@ -71,7 +71,11 @@ void TigerObjectCCalls::trySaveImageToPhotoAlbum(const char *fileName)
                                    nil);
 }
 
-
+void TigerObjectCCalls::tryOpenUrl(const char *url)
+{
+    NSURL *nsurl = [NSURL URLWithString:[NSString stringWithUTF8String:url]];
+    [[UIApplication sharedApplication] openURL:nsurl];
+}
 
 
 

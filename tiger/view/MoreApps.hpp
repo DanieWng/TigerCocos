@@ -64,6 +64,8 @@ private:
     
 private:
 
+    Sprite *_twinkle;
+    
     std::vector<AppIconData> _appIconsData;
     
     std::unordered_map<std::string, AppLinkData> _appLinksData;

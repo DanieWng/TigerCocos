@@ -28,6 +28,12 @@ void MoreApps::onEnter()
 {
     TigerBasePopupLayer::onEnter();
     
+    _twinkle->runAction(RepeatForever::create(Sequence::create(FadeIn::create(0.15f),
+                                                               DelayTime::create(0.2f),
+                                                               FadeOut::create(0.15f),
+                                                               DelayTime::create(0.2f),
+                                                               nullptr) ));
+    
     Director::getInstance()->getTextureCache()->removeAllTextures();
 }
 
@@ -53,13 +59,14 @@ bool MoreApps::init()
     
     auto paths = FileUtils::getInstance()->getSearchPaths();
     
-    auto twinkle = Sprite::create("layer/twinkle.png");
-    IF_NULL_THEN_RETUEN(twinkle, false);
-    Tiger::setPosBaseRetina(twinkle,
+    _twinkle = Sprite::create("layer/twinkle.png");
+    IF_NULL_THEN_RETUEN(_twinkle, false);
+    Tiger::setPosBaseRetina(_twinkle,
                             Vec2(38, 1458),
                             Vec2::ANCHOR_TOP_LEFT,
                             scene_scale/2.0f);
-    this->addChild(twinkle);
+    _twinkle->setOpacity(0);
+    this->addChild(_twinkle);
     
     auto exit_event = [&](Ref *ref, Widget::TouchEventType type){
         if (type == Widget::TouchEventType::ENDED)
@@ -184,6 +191,7 @@ void MoreApps::iconTouchEvent(cocos2d::Ref *ref, Widget::TouchEventType type)
             
         case cocos2d::ui::Widget::TouchEventType::ENDED:
             TLog("MoreApps::iconTouchEvent -- %s -- %s", icon_name.c_str(), _appLinksData.at(icon_name)._ios.c_str());
+            Tiger::openUrl(_appLinksData.at(icon_name)._ios);
             break;
             
         default:

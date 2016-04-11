@@ -27,6 +27,7 @@ public:
     
     static void trySaveImageToPhotoAlbum(const char* fileName);
     
+    static void tryOpenUrl(const char* url);
 };
 
 #endif /* defined(__TheSolarSystem__TigerObjectCCalls__) */

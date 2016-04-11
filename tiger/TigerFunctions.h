@@ -14,12 +14,7 @@
 #include <ui/CocosGUI.h>
 #include "TigerEnum.h"
 #include "TigerMacros.h"
-
-#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-#include "native/java/TigerJNICalls.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-#include "native/objectc/TigerObjectCCalls.h"
-#endif
+#include "TigerNativeFunction.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -30,15 +25,6 @@ USING_NS_CC;
 
 namespace Tiger
 {
-    inline void imageSaveToPhotoAlbum(const std::string file)
-    {
-        #if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-            TigerObjectCCalls::trySaveImageToPhotoAlbum(file.c_str());
-        #elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-            
-        #endif
-    }
-    
     static inline std::string getMD5(const std::string str)
     {
         md5_state_t state;

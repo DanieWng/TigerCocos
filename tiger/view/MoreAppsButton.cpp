@@ -226,7 +226,7 @@ bool MoreAppsButton::initWithRightBottom(bool isLastApp)
     auto light = Sprite::create("btn_new/side_light.png");
     IF_NULL_THEN_RETUEN(light, false);
     Tiger::setPosBaseRetina(light,
-                            Vec2(38, 306),
+                            Vec2(38, 285),
                             Vec2::ANCHOR_TOP_LEFT,
                             scene_scale/2.0f);
     _clippingNode->addChild(light);
