@@ -7,51 +7,12 @@
 //
 
 #include "TigerMoreAppsVersionUtil.hpp"
-#include <external/json/rapidjson.h>
-#include <external/json/document.h>
 #include "BaseAppConfig.hpp"
 #include "../TigerFunctions.h"
 
 using namespace Tiger;
-using namespace rapidjson;
 
 // inline method begin
-
-static inline const std::string getResponseString(HttpResponse *response)
-{
-    std::string data = "";
-    std::vector<char>* v = response->getResponseData();
-    for (int i=0; i<v->size(); i++)
-    {
-        data.append(cocos2d::__String::createWithFormat("%c", v->at(i))->getCString());
-    }
-    
-    return data;
-}
-
-static inline bool checkResponseStatus(HttpResponse *response)
-{
-    if (!response)
-    {
-        CCLOG("no response");
-        return false;
-    }
-    
-    int status_code = (int)response->getResponseCode();
-    char status_string[64] = {};
-    sprintf(status_string, "Http Status Code: %d, tag = %s", status_code, response->getHttpRequest()->getTag());
-    CCLOG("response code: %s", status_string);
-    
-    if (status_code == HTTP_ERROR_TIME_OUT ||
-        !response->isSucceed())
-    {
-        CCLOG("\nresponse failed");
-        CCLOG("error buffer: %s\n", response->getErrorBuffer());
-        return false;
-    }
-    
-    return true;
-}
 
 static inline const std::string unzip(const void* data, ssize_t dataSize, const std::string savePath)
 {

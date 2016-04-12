@@ -12,42 +12,27 @@
 #include "TigerHttpClient.hpp"
 
 namespace Tiger {
-
-enum class CountryType
-{
-    cChina,
-    cKorea,
-    cOther,
-    cUnkown
-};
     
 struct IPResponeData
 {
-    std::string _ipAddress;
+//    std::string _as;
+//    std::string _city;
+//    std::string _country;
     std::string _countryCode;
-    std::string _countryName;
-    std::string _regionCode;
-    std::string _regionName;
-    std::string _city;
-    std::string _zipCode;
-    std::string _timeZone;
-    double      _latitude;
-    double      _longitude;
-    int         _metroCode;
+//    std::string _isp;
+//    float       _latitude;
+//    float       _longitude;
+//    std::string _org;
+//    std::string _query;
+//    std::string _region;
+//    std::string _regionName;
+//    std::string _status;
+//    std::string _timeZone;
+//    std::string _zip;
     
     IPResponeData()
     {
-        _ipAddress = "";
         _countryCode = "";
-        _countryName = "";
-        _regionCode = "";
-        _regionName = "";
-        _city = "";
-        _zipCode = "";
-        _timeZone = "";
-        _latitude = 0.0f;
-        _longitude = 0.0f;
-        _metroCode = 0;
     }
 };
     

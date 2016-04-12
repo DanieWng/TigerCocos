@@ -9,8 +9,12 @@
 #ifndef TigerHttpClient_hpp
 #define TigerHttpClient_hpp
 
-#include <network/HttpClient.h>
 
+#include <network/HttpClient.h>
+#include <external/json/rapidjson.h>
+#include <external/json/document.h>
+
+using namespace rapidjson;
 using namespace cocos2d::network;
 
 #define HTTP_ERROR_TIME_OUT -1
@@ -18,6 +22,44 @@ using namespace cocos2d::network;
 
 namespace Tiger
 {
+    static inline const std::string getResponseString(HttpResponse *response)
+    {
+        std::string data = "";
+        std::vector<char>* v = response->getResponseData();
+        for (int i=0; i<v->size(); i++)
+        {
+            data.append(cocos2d::__String::createWithFormat("%c", v->at(i))->getCString());
+        }
+        
+        CCLOG("getResponseString : \n%s", data.c_str());
+        
+        return data;
+    }
+    
+    static inline bool checkResponseStatus(HttpResponse *response)
+    {
+        if (!response)
+        {
+            CCLOG("no response");
+            return false;
+        }
+        
+        int status_code = (int)response->getResponseCode();
+        char status_string[64] = {};
+        sprintf(status_string, "Http Status Code: %d, tag = %s", status_code, response->getHttpRequest()->getTag());
+        CCLOG("response code: %s", status_string);
+        
+        if (status_code == HTTP_ERROR_TIME_OUT ||
+            !response->isSucceed())
+        {
+            CCLOG("\nresponse failed");
+            CCLOG("error buffer: %s\n", response->getErrorBuffer());
+            return false;
+        }
+        
+        return true;
+    }
+    
     class TigerHttpClient
     {
     public:
