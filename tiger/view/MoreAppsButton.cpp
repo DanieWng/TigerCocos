@@ -120,13 +120,19 @@ bool MoreAppsButton::initWithRightTop(bool isLastApp)
     this->addChild(_moreText);
     
     _clippingNode = ClippingNode::create();
-    
-    auto stencil = Sprite::createWithTexture(bg->getTexture());
-    stencil->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
+
+    auto stencil = DrawNode::create();
+    stencil->drawSolidRect(Vec2(0, 0),
+                           Vec2(219, 196)*(scene_scale/2.0f),
+                           Color4F::GREEN);
+    Tiger::setPosBaseRetina(stencil,
+                            Vec2(38, 110),
+                            Vec2::ANCHOR_BOTTOM_LEFT,
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->setStencil(stencil);
     
     _clippingNode->setInverted(false);
-    _clippingNode->setAlphaThreshold(0.5f);
     
     _diagonalLine = Sprite::create("btn_new/l_top_diagonal_line.png");
     IF_NULL_THEN_RETUEN(_diagonalLine, false);
@@ -190,13 +196,19 @@ bool MoreAppsButton::initWithRightBottom(bool isLastApp)
     this->addChild(_moreText);
     
     _clippingNode = ClippingNode::create();
-    
-    auto stencil = Sprite::createWithTexture(bg->getTexture());
-    stencil->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
+
+    auto stencil = DrawNode::create();
+    stencil->drawSolidRect(Vec2(0, 0),
+                           Vec2(219, 196)*(scene_scale/2.0f),
+                           Color4F::GREEN);
+    Tiger::setPosBaseRetina(stencil,
+                            Vec2(38, 89),
+                            Vec2::ANCHOR_BOTTOM_LEFT,
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->setStencil(stencil);
     
     _clippingNode->setInverted(false);
-    _clippingNode->setAlphaThreshold(0.5f);
     
     _diagonalLine = Sprite::create("btn_new/l_top_diagonal_line.png");
     IF_NULL_THEN_RETUEN(_diagonalLine, false);
