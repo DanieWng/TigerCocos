@@ -28,22 +28,11 @@ public:
     static long  tryGetVailableMemorySize();
     
     static void trySaveImageToPhotoAlbum(const char* fileName);
-    
     static const char* trySaveImageToSdcard(const char* fileName);
-    
-    static void tryAddSliderInCoverScene();
-    static void tryAddSliderInMainScene();
-    static void tryAddSliderInPageScene();
-    static void tryAddSliderInLoadScene();
-    static void tryAddSliderInGameScene();
   
-    static void tryPreloadBiberBGM(const char* soundFile);
-    static void tryPlayBiberBGM(const char* soundFile, bool isLoop);
-    static void tryPauseBiberBGM();
-    static void tryResumeBiberBGM();
-    static void tryStopBiberBGM();
-    static void trySetBiberBGMVolume(float volume);
+    static void tryOpenUrl(const char* url);
     
+    static void trySendSceneNameToGoogleAnalytics(const char* scene);
 };
 
 

@@ -12,9 +12,10 @@
 #import "Reachability.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <AVFoundation/AVFoundation.h>
-#import "cocos2d.h"
-//#import "CCEAGLView.h"
 #import "AppController.h"
+#import "ImageHelper.h"
+#import <Google/Analytics.h>
+#import "BaseAppConfig.hpp"
 
 void TigerObjectCCalls::trySendAnMail(const char *address, const char *title, const char *body)
 {
@@ -63,12 +64,9 @@ void TigerObjectCCalls::trySaveImageToPhotoAlbum(const char *fileName)
 {
     NSString *path = [NSString stringWithUTF8String:fileName];
     
-    UIImage *image = [UIImage imageWithContentsOfFile:path];
+    ImageHelper *imageHelper = [ImageHelper alloc];
     
-    UIImageWriteToSavedPhotosAlbum(image,
-                                   nil,
-                                   nil,
-                                   nil);
+    [imageHelper moveImageToCameraRoll:path];
 }
 
 void TigerObjectCCalls::tryOpenUrl(const char *url)
@@ -77,8 +75,13 @@ void TigerObjectCCalls::tryOpenUrl(const char *url)
     [[UIApplication sharedApplication] openURL:nsurl];
 }
 
-
-
+void TigerObjectCCalls::trySendSceneNameToGoogleAnalytics(const char *scene)
+{
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName value:[NSString stringWithUTF8String:scene]];
+    [tracker set:kGAIAppVersion value:[NSString stringWithUTF8String:APP_VERSION_NAME]];
+    [tracker send:[[GAIDictionaryBuilder createScreenView] build]];
+}
 
 
 

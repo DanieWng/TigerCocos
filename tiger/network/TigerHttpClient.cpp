@@ -64,6 +64,8 @@ void TigerHttpClient::requestGet()
     
     request->setResponseCallback(CC_CALLBACK_2(TigerHttpClient::onHttpResponse, this));
     
+    HttpClient::getInstance()->setTimeoutForConnect(3600);
+    HttpClient::getInstance()->setTimeoutForRead(3600);
     HttpClient::getInstance()->send(request);
     
     request->release();

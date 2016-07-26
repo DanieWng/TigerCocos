@@ -22,7 +22,7 @@ TigerBasePopupLayer::~TigerBasePopupLayer()
 
 bool TigerBasePopupLayer::init()
 {
-    if (!Layer::init())
+    if (!TigerBaseLayer::init())
     {
         return false;
     }
@@ -32,7 +32,7 @@ bool TigerBasePopupLayer::init()
 
 void TigerBasePopupLayer::addShadowLayer(const cocos2d::Size size)
 {
-    auto shadow_layer = LayerColor::create(Color4B(0, 0, 0, 200), size.width, size.height);
+    auto shadow_layer = LayerColor::create(Color4B(0, 0, 0, 178), size.width, size.height);
     shadow_layer->setTag(SHADOW_LAYER_TAG);
     this->addChild(shadow_layer, -1);
 }

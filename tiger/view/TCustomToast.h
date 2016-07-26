@@ -35,7 +35,7 @@ private:
     
     void removeSelf(float dt);
     
-    cocos2d::LabelTTF   *_toastMsg;
+    cocos2d::Label      *_toastMsg;
     cocos2d::LayerColor *_bgLayer;
     cocos2d::Size       _contentSize;
     

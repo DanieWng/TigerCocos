@@ -7,11 +7,8 @@
 //
 
 #include "TigerIPLocation.hpp"
-#include "../cocos2d/external/json/rapidjson.h"
-#include "../cocos2d/external/json/document.h"
 
 using namespace Tiger;
-using namespace rapidjson;
 
 TigerIPLocation* TigerIPLocation::_instance = nullptr;
 

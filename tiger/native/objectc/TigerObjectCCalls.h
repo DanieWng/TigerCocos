@@ -11,7 +11,6 @@
 
 #include <stddef.h>
 
-
 class TigerObjectCCalls
 {
     
@@ -28,6 +27,9 @@ public:
     static void trySaveImageToPhotoAlbum(const char* fileName);
     
     static void tryOpenUrl(const char* url);
+    
+    static void trySendSceneNameToGoogleAnalytics(const char* scene);
 };
+
 
 #endif /* defined(__TheSolarSystem__TigerObjectCCalls__) */

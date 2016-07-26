@@ -37,9 +37,9 @@ public:
     void swapNormalAndSelectTextures();
     
     virtual void loadTextures(const std::string& normal,
-                         const std::string& select,
-                         const std::string& disable,
-                         Widget::TextureResType type);
+                              const std::string& select,
+                              const std::string& disable,
+                              Widget::TextureResType type);
     
 protected:
     

@@ -20,7 +20,7 @@
 #define CC_TEXTURE_CACHE    Director::getInstance()->getTextureCache()
 #define CC_ANIMATION_CACHE  AnimationCache::getInstance()
 
-#define TLog(format, ...) do{CC_BREAK_IF(false); cocos2d::log(format, ##__VA_ARGS__);} while(0)
+#define TLog(format, ...) do{CC_BREAK_IF(true); cocos2d::log(format, ##__VA_ARGS__);} while(0)
 #define LAMBDA_FUNCTION_START [&](){
 #define LAMBDA_FUNCTION_START_PARAM(_PARAM_) [&, _PARAM_](){
 #define LAMBDA_FUNCTION_END   }
@@ -47,7 +47,9 @@
     _eventDispatcher->removeEventListener(_LISTENER_);\
     _LISTENER_ = nullptr;
 
-#define SAFE_FREE_VECTOR(_TYPE_, _VAR_) std::vector<_TYPE_>().swap(_VAR_);
+#define SAFE_FREE_VECTOR_1(_TYPE_, _VAR_) std::vector<_TYPE_>().swap(_VAR_);
+#define SAFE_FREE_VECTOR_2(_V_) _V_.clear(); _V_.shrink_to_fit();
+
 
 #define TEXTURE2D_USE_RGB565()      Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGB565)
 #define TEXTURE2D_USE_RGB888()      Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGB888)
@@ -55,6 +57,10 @@
 
 
 #define IF_NULL_THEN_RETUEN(_REF_, _RETURN_) if(_REF_ == nullptr) return _RETURN_
+
+#define USE_SPRITE_FRAME false
+
+#define CREATE_SPRITE(_FILE_, _USE_SPRITE_FRAME_) _USE_SPRITE_FRAME_ ? Sprite::createWithSpriteFrameName(_FILE_) : Sprite::create(_FILE_)
 
 
 #endif /* defined(__Yoohoo__TigerMacros__) */

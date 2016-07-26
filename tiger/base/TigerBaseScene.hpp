@@ -10,19 +10,18 @@
 #ifndef TigerBaseScene_hpp
 #define TigerBaseScene_hpp
 
-#include "cocos2d.h"
-
-USING_NS_CC;
+#include "TigerBaseLayer.hpp"
 
 typedef std::function<void(float)> fAsyncLoadPercentDelegate;
 
-class TigerBaseScene : public Layer
+class TigerBaseScene : public TigerBaseLayer
 {
 public:
     
     TigerBaseScene();
     virtual ~TigerBaseScene();
     
+    virtual void onEnter() override;
     virtual bool init() override;
     
     void setSceneLoadPercentDelegate(const fAsyncLoadPercentDelegate d);
@@ -31,12 +30,34 @@ public:
     
 protected:
     
+    void setKeyboardListenerEnable(bool enable);
+    virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, cocos2d::Event *event) override;
+    
+    void showExitWarnningMsg();
+    
+    virtual void doBackKeyClickEvent(){};
+    
+protected:
+    
     fAsyncLoadPercentDelegate _loadPercentdelegate;
+    int _asyncCompletedCount;
     
 private:
     
+    virtual void asyncLoadResource() {};
+    virtual void asyncImageCallback(Texture2D *texture) {};
     virtual void addBG(){};
     
+    virtual void preloadEffect() {};
+
 };
 
 #endif /* TigerBaseScene_hpp */
+
+
+
+
+
+
+
+

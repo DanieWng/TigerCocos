@@ -7,12 +7,51 @@
 //
 
 #include "TigerMoreAppsVersionUtil.hpp"
+#include <external/json/rapidjson.h>
+#include <external/json/document.h>
 #include "BaseAppConfig.hpp"
 #include "../TigerFunctions.h"
 
 using namespace Tiger;
+using namespace rapidjson;
 
 // inline method begin
+
+static inline const std::string getResponseString(HttpResponse *response)
+{
+    std::string data = "";
+    std::vector<char>* v = response->getResponseData();
+    for (int i=0; i<v->size(); i++)
+    {
+        data.append(cocos2d::__String::createWithFormat("%c", v->at(i))->getCString());
+    }
+    
+    return data;
+}
+
+static inline bool checkResponseStatus(HttpResponse *response)
+{
+    if (!response)
+    {
+        CCLOG("no response");
+        return false;
+    }
+    
+    int status_code = (int)response->getResponseCode();
+    char status_string[64] = {};
+    sprintf(status_string, "Http Status Code: %d, tag = %s", status_code, response->getHttpRequest()->getTag());
+    CCLOG("response code: %s", status_string);
+    
+    if (status_code == HTTP_ERROR_TIME_OUT ||
+        !response->isSucceed())
+    {
+        CCLOG("\nresponse failed");
+        CCLOG("error buffer: %s\n", response->getErrorBuffer());
+        return false;
+    }
+    
+    return true;
+}
 
 static inline const std::string unzip(const void* data, ssize_t dataSize, const std::string savePath)
 {
@@ -81,11 +120,11 @@ TigerMoreAppsVersionUtil::~TigerMoreAppsVersionUtil()
     _statusdelegate = nullptr;
 }
 
-void TigerMoreAppsVersionUtil::checkVersionBegan()
+void TigerMoreAppsVersionUtil::checkVersionBegan(bool isChina)
 {
     auto http_client = TigerHttpClient::getInstance();
     
-    http_client->setUrl(VERSION_URL);
+    http_client->setUrl(isChina?VERSION_URL_ALIYUN:VERSION_URL_AWS);
     http_client->setResponseDelegate(CC_CALLBACK_1(TigerMoreAppsVersionUtil::listenCheckVersionEnded, this));
     http_client->requestGet();
     
@@ -103,11 +142,6 @@ bool TigerMoreAppsVersionUtil::listenCheckVersionEnded(cocos2d::network::HttpRes
     
     std::string data = getResponseString(response);
     
-    CCLOG("\nresponse data: %s", data.c_str());
-    
-    BaseAppConfig::getInstance()->setLastConnectServerData(Tiger::getCurrentTime());
-    BaseAppConfig::getInstance()->saveUserDefault();
-    
     auto new_version_data = parseJson(data.c_str());
     
     if (new_version_data._version == 0)
@@ -115,6 +149,9 @@ bool TigerMoreAppsVersionUtil::listenCheckVersionEnded(cocos2d::network::HttpRes
         TLog("get version data faild");
         return false;
     }
+    
+    BaseAppConfig::getInstance()->setLastConnectServerData(Tiger::getCurrentTime());
+    BaseAppConfig::getInstance()->saveUserDefault();
     
     auto cur_version_data = BaseAppConfig::getInstance()->getCurVersionData();
     
@@ -130,6 +167,7 @@ bool TigerMoreAppsVersionUtil::listenCheckVersionEnded(cocos2d::network::HttpRes
         // has new version, should get new
         BaseAppConfig::getInstance()->setCurVersionData(new_version_data);
         BaseAppConfig::getInstance()->saveUserDefault();
+        UserDefault::getInstance()->flush();
         
         downloadMoreAppsBegan();
     }
@@ -203,7 +241,8 @@ void TigerMoreAppsVersionUtil::listenDownloadMoreAppsEnded(cocos2d::network::Htt
 {
     TigerHttpClient::getInstance()->destoryInstance();
     
-    if (!checkResponseStatus(response))
+    if (!checkResponseStatus(response) ||
+        response->getResponseData()->size() == 0)
     {
         RETURN_DELEGATE_1(_statusdelegate, MoreAppsVersionStatus::kIsDownloadError);
         return;
@@ -214,6 +253,8 @@ void TigerMoreAppsVersionUtil::listenDownloadMoreAppsEnded(cocos2d::network::Htt
     std::string save_root = MORE_APPS_ROOT_PATH;
     
     std::string root_directory = unzip(&response->getResponseData()->at(0), response->getResponseData()->size(), save_root);
+    
+    TLog("unzip end -- %s", root_directory.c_str());
     
     save_root.append(root_directory);
     

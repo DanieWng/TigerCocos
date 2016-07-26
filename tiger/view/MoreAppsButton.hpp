@@ -9,6 +9,7 @@
 #ifndef MoreAppsButton_hpp
 #define MoreAppsButton_hpp
 
+#include "cocos2d.h"
 #include <ui/CocosGUI.h>
 
 using namespace cocos2d::ui;

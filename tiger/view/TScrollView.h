@@ -10,16 +10,17 @@
 #define __Yoohoo__TigerScrollView__
 
 #include "cocos2d.h"
+#include <ui/CocosGUI.h>
 
 USING_NS_CC;
-
+using namespace ui;
 
 namespace Tiger
 {
 
 class TScrollViewBar;
     
-class TScrollView : public LayerColor
+class TScrollView : public Layer
 {
 public:
     
@@ -78,7 +79,7 @@ public:
     /**
      Get chrildrens of container.
      */
-    LayerColor* getContainer() { return _container; };
+    Layout* getContainer() { return _container; };
     
     /**
      Set container size of scroll view.
@@ -162,7 +163,7 @@ protected:
     
     CC_SYNTHESIZE(float, _horizontalMinEffectDistance, HorizontalMinEffectiveDistance);
     
-    LayerColor* _container;
+    Layout* _container;
     Size   _containerSize;
     
     Vec2   _offset;

@@ -40,11 +40,12 @@ void TigerNewsLetter::destoryInstance()
 
 TigerNewsLetter::TigerNewsLetter()
 {
-    _isRunBackground = false;
+    _delegate = nullptr;
 }
 
 TigerNewsLetter::~TigerNewsLetter()
 {
+    _delegate = nullptr;
 }
 
 void TigerNewsLetter::addSubscriberToListID(const std::string &dataCenter,
@@ -52,21 +53,24 @@ void TigerNewsLetter::addSubscriberToListID(const std::string &dataCenter,
                                             const Tiger::NewsLetterMemberData &data,
                                             const bool isRunBackground)
 {
-    _isRunBackground = isRunBackground;
-    
-    auto http_client = TigerHttpClient::getInstance();
-    
     auto url = __String::createWithFormat("https://%s.api.mailchimp.com/3.0/lists/%s/members/%s",
                                           dataCenter.c_str(),
                                           listID.c_str(),
                                           data._mailMD5.c_str())->getCString();
+    
+    doPutEvent(url, data);
+}
+
+void TigerNewsLetter::doPutEvent(const std::string &url, const Tiger::NewsLetterMemberData &data)
+{
+    auto http_client = TigerHttpClient::getInstance();
     http_client->setUrl(url);
     
     std::vector<std::string> header;
     header.clear();
     header.push_back(__String::createWithFormat("Authorization: apikey %s", MAILCHIMP_API_KEY)->getCString());
     http_client->setHeaders(header);
-
+    
     auto create_json = [&](NewsLetterMemberData d)->const std::string{
         Document document;
         document.SetObject();
@@ -82,17 +86,20 @@ void TigerNewsLetter::addSubscriberToListID(const std::string &dataCenter,
         
         document.AddMember("merge_fields", merge_field_object, allocator);
         
+        std::string language = Application::getInstance()->getCurrentLanguage()==LanguageType::KOREAN?"ko":"en";
+        document.AddMember("language", rapidjson::Value(language.c_str(), allocator), allocator);
+        
         StringBuffer buffer;
         rapidjson::Writer<StringBuffer> writer(buffer);
         document.Accept(writer);
+    
+        CCLOG("json: %s", buffer.GetString());
         
         return buffer.GetString();
     };
-
+    
     http_client->setPostData(create_json(data));
-    
     http_client->setResponseDelegate(CC_CALLBACK_1(TigerNewsLetter::listenHttpResult, this));
-    
     http_client->requestPut();
 }
 
@@ -136,10 +143,18 @@ bool TigerNewsLetter::listenHttpResult(cocos2d::network::HttpResponse *response)
     
     CCLOG("\nresponse data: %s", data.c_str());
     
+    if (_delegate)
+    {
+        _delegate->putNewsLetterHttpStatusCode(status_code);
+    }
+    
     return true;
 }
 
-
+void TigerNewsLetter::setDelegate(Tiger::TigerNewsLetterHttpDelegate *d)
+{
+    _delegate = d;
+}
 
 
 

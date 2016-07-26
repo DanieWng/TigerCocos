@@ -116,7 +116,8 @@ bool MoreAppsButton::initWithRightTop(bool isLastApp)
     Tiger::setPosBaseRetina(_moreText,
                             Vec2(43, 369),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     this->addChild(_moreText);
     
     _clippingNode = ClippingNode::create();
@@ -143,7 +144,8 @@ bool MoreAppsButton::initWithRightTop(bool isLastApp)
     Tiger::setPosBaseRetina(_diagonalLine,
                             Vec2(d_start_x, 306),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(_diagonalLine);
     
     std::string icon_res = isLastApp==false?"btn_new/new_icon.png":"btn_new/second_icon.png";
@@ -156,7 +158,8 @@ bool MoreAppsButton::initWithRightTop(bool isLastApp)
     Tiger::setPosBaseRetina(_icon,
                             Vec2(i_start_x, 294),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(_icon);
     
     auto light = Sprite::create("btn_new/r_top_side_light.png");
@@ -164,7 +167,8 @@ bool MoreAppsButton::initWithRightTop(bool isLastApp)
     Tiger::setPosBaseRetina(light,
                             Vec2(38, 306),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(light);
 
     this->addChild(_clippingNode);
@@ -192,7 +196,8 @@ bool MoreAppsButton::initWithRightBottom(bool isLastApp)
     Tiger::setPosBaseRetina(_moreText,
                             Vec2(43, 89),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     this->addChild(_moreText);
     
     _clippingNode = ClippingNode::create();
@@ -219,7 +224,8 @@ bool MoreAppsButton::initWithRightBottom(bool isLastApp)
     Tiger::setPosBaseRetina(_diagonalLine,
                             Vec2(d_start_x, 285),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(_diagonalLine);
     
     std::string icon_res = isLastApp==false?"btn_new/new_icon.png":"btn_new/second_icon.png";
@@ -232,7 +238,8 @@ bool MoreAppsButton::initWithRightBottom(bool isLastApp)
     Tiger::setPosBaseRetina(_icon,
                             Vec2(i_start_x, 275),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(_icon);
     
     auto light = Sprite::create("btn_new/side_light.png");
@@ -240,7 +247,8 @@ bool MoreAppsButton::initWithRightBottom(bool isLastApp)
     Tiger::setPosBaseRetina(light,
                             Vec2(38, 285),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(light);
     
     this->addChild(_clippingNode);
@@ -268,7 +276,8 @@ bool MoreAppsButton::initWithLeftTop(bool isLastApp)
     Tiger::setPosBaseRetina(_moreText,
                             Vec2(88, 259),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     this->addChild(_moreText);
     
     _clippingNode = ClippingNode::create();
@@ -278,7 +287,8 @@ bool MoreAppsButton::initWithLeftTop(bool isLastApp)
     Tiger::setPosBaseRetina(stencil,
                             Vec2(79, 203),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->setStencil(stencil);
     
     _clippingNode->setInverted(false);
@@ -293,7 +303,8 @@ bool MoreAppsButton::initWithLeftTop(bool isLastApp)
     Tiger::setPosBaseRetina(_diagonalLine,
                             Vec2(79, d_start_y),
                             Vec2::ANCHOR_BOTTOM_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(_diagonalLine);
     
     std::string icon_res = isLastApp==false?"btn_new/l_top_new_icon.png":"btn_new/l_top_second_icon.png";
@@ -306,7 +317,8 @@ bool MoreAppsButton::initWithLeftTop(bool isLastApp)
     Tiger::setPosBaseRetina(_icon,
                             Vec2(107, i_start_y),
                             Vec2::ANCHOR_BOTTOM_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(_icon);
     
     auto light = Sprite::create("btn_new/l_top_side_light.png");
@@ -314,7 +326,8 @@ bool MoreAppsButton::initWithLeftTop(bool isLastApp)
     Tiger::setPosBaseRetina(light,
                             Vec2(79, 203),
                             Vec2::ANCHOR_TOP_LEFT,
-                            scene_scale/2.0f);
+                            scene_scale/2.0f,
+                            false);
     _clippingNode->addChild(light);
 
     

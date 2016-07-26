@@ -13,8 +13,9 @@
 #include "TigerEnum.h"
 #include "TigerMoreAppsVersionUtil.hpp"
 
-#define DEBUG_SHOW 1
-#define APP_RELEASE_DATE 1459746912
+#define DEBUG_SHOW          0
+#define APP_RELEASE_DATE    1465401600
+#define APP_VERSION_NAME    "release 1.0"
 
 USING_NS_CC;
 
@@ -26,21 +27,27 @@ public:
     virtual ~BaseAppConfig();
     
     static BaseAppConfig* getInstance();
-    static void destoryInstance();
+    virtual void destoryInstance();
     
     /*
      multi display functions.
      */
-    const Size getDesginResoucesSizeByDevice();
     const float getSceneScaleFactor();
     void setSupportMultiDisplay();
     
     virtual const std::string getLanguageLetter();
     virtual void saveUserDefault();
     
-private:
+protected:
     
-    void initUserDefault();
+    /**
+     初始化 user default 配置文件
+     @return bool - If true, then means not exist file and created one.
+     If false, then means has exist file and get data from file.
+     */
+    virtual bool initUserDefault();
+    
+    cocos2d::Size getDesginResoucesSizeByDevice();
     
 protected:
     
@@ -53,10 +60,10 @@ protected:
     
     CC_SYNTHESIZE(unsigned int, _lastConnectDate, LastConnectServerData);
     
-private:
+protected:
     
     static BaseAppConfig* _instance;
-    
+     
 };
 
 #endif /* BaseAppConfig_hpp */

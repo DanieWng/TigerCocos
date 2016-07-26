@@ -9,8 +9,8 @@
 #ifndef NewsLetterPopupLayer_hpp
 #define NewsLetterPopupLayer_hpp
 
-#include "../base/TigerBasePopupLayer.hpp"
-#include "../network/TigerNewsLetter.hpp"
+#include "TigerBasePopupLayer.hpp"
+#include "TigerNewsLetter.hpp"
 #include <ui/CocosGUI.h>
 
 using namespace cocos2d::ui;
@@ -28,6 +28,9 @@ public:
     
     virtual bool init() override;
     CREATE_FUNC(NewsLetterPopupLayer);
+    
+    virtual void show() override;
+    virtual void hide() override;
     
 private:
     
@@ -53,6 +56,8 @@ private:
     EditBox *_email;
     EditBox *_firstName;
     EditBox *_lastName;
+    
+    Sprite *_popup;
     
 };
 

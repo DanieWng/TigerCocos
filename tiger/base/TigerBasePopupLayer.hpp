@@ -9,15 +9,15 @@
 #ifndef TigerBasePopupLayer_hpp
 #define TigerBasePopupLayer_hpp
 
-#include <cocos2d.h>
+#include "TigerBaseLayer.hpp"
+
 #include "../TigerEnum.h"
 
-USING_NS_CC;
 USING_NS_T;
 
 typedef std::function<void(Ref*, LayerStatus)> fLayerStatusDelegate;
 
-class TigerBasePopupLayer : public Layer
+class TigerBasePopupLayer : public TigerBaseLayer
 {
 public:
     
@@ -25,6 +25,7 @@ public:
     virtual ~TigerBasePopupLayer();
     
     virtual bool init() override;
+    CREATE_FUNC(TigerBasePopupLayer)
     
     void setPopupLayerStatusDelegate(const fLayerStatusDelegate d);
     

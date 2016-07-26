@@ -95,7 +95,12 @@ TScrollView* TScrollView::create(const cocos2d::Size &size, const cocos2d::Color
 
 bool TScrollView::initWithSize(const cocos2d::Size &size)
 {
-    if (!LayerColor::initWithColor(Color4B(0, 0, 0, 0), size.width, size.height))
+//    if (!LayerColor::initWithColor(Color4B(0, 0, 0, 0), size.width, size.height))
+//    {
+//        return false;
+//    }
+
+    if (!Layer::init())
     {
         return false;
     }
@@ -110,7 +115,7 @@ bool TScrollView::initWithSize(const cocos2d::Size &size)
 
 bool TScrollView::initWithSizeAndColor4B(const cocos2d::Size &size, const cocos2d::Color4B &color)
 {
-    if (!LayerColor::initWithColor(color, size.width, size.height))
+    if (!Layer::init())
     {
         return false;
     }
@@ -120,12 +125,17 @@ bool TScrollView::initWithSizeAndColor4B(const cocos2d::Size &size, const cocos2
     // 设置可触摸范围，默认位置起点为（0，0）.
     _frameRect = Rect(0, 0, size.width, size.height);
     
+    auto bg_color = LayerColor::create(color, size.width, size.height);
+    this->addChild(bg_color);
+    
     return true;
 }
 
 void TScrollView::onEnter()
 {
-    LayerColor::onEnter();
+//    LayerColor::onEnter();
+    
+    Layer::onEnter();
     
     this->scheduleUpdate();
 }
@@ -134,8 +144,8 @@ void TScrollView::setContainerSize(const cocos2d::Size &size)
 {
     if (_container == nullptr)
     {
-        _container = LayerColor::create(Color4B(0, 0, 0, 0));
-        _container->setAnchorPoint(Vec2::ZERO);
+        _container = Layout::create();
+        _container->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
         this->addChild(_container);
     }
     

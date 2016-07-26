@@ -50,7 +50,7 @@ namespace Tiger
         static TigerMoreAppsVersionUtil* getInstance();
         static void destoryInstance();
         
-        void checkVersionBegan();
+        void checkVersionBegan(bool isChina=false);
         
         void downloadMoreAppsBegan();
         

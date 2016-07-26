@@ -9,10 +9,6 @@
 #include "MoreApps.hpp"
 #include <TigerFunctions.h>
 #include <BaseAppConfig.hpp>
-#include <external/json/rapidjson.h>
-#include <external/json/document.h>
-
-using namespace rapidjson;
 
 MoreApps::MoreApps()
 {
@@ -27,12 +23,6 @@ MoreApps::~MoreApps()
 void MoreApps::onEnter()
 {
     TigerBasePopupLayer::onEnter();
-    
-    _twinkle->runAction(RepeatForever::create(Sequence::create(FadeIn::create(0.15f),
-                                                               DelayTime::create(0.2f),
-                                                               FadeOut::create(0.15f),
-                                                               DelayTime::create(0.2f),
-                                                               nullptr) ));
     
     Director::getInstance()->getTextureCache()->removeAllTextures();
 }
@@ -59,14 +49,13 @@ bool MoreApps::init()
     
     auto paths = FileUtils::getInstance()->getSearchPaths();
     
-    _twinkle = Sprite::create("layer/twinkle.png");
-    IF_NULL_THEN_RETUEN(_twinkle, false);
-    Tiger::setPosBaseRetina(_twinkle,
+    auto twinkle = Sprite::create("layer/twinkle.png");
+    IF_NULL_THEN_RETUEN(twinkle, false);
+    Tiger::setPosBaseRetina(twinkle,
                             Vec2(38, 1458),
                             Vec2::ANCHOR_TOP_LEFT,
                             scene_scale/2.0f);
-    _twinkle->setOpacity(0);
-    this->addChild(_twinkle);
+    this->addChild(twinkle);
     
     auto exit_event = [&](Ref *ref, Widget::TouchEventType type){
         if (type == Widget::TouchEventType::ENDED)
@@ -115,27 +104,24 @@ bool MoreApps::init()
     return true;
 }
 
-static inline bool parseJsonData(Document& document, const std::string& data)
-{
-    document.Parse<0>(data.c_str());
-    if (document.HasParseError())
-    {
-        cocos2d::log("### json document parse error [%u]###", document.GetParseError());
-        return false;
-    }
-    
-    return true;
-}
-
 bool MoreApps::loadMoreAppsData()
 {
-    if (!FileUtils::getInstance()->isFileExist("moreapps.json"))
+    std::string file = "moreapps_last_version.json";
+    bool is_last_app = false;
+    
+    if (APP_RELEASE_DATE >= BaseAppConfig::getInstance()->getCurVersionData()._lastAppReleaseDate)
+    {
+        is_last_app = true;
+        file = "moreapps_second_version.json";
+    }
+    
+    if (!FileUtils::getInstance()->isFileExist(file))
     {
         TLog("\n-- Lost moreapps.json file --\n");
         return false;
     }
     
-    const std::string data = FileUtils::getInstance()->getStringFromFile("moreapps.json");
+    const std::string data = FileUtils::getInstance()->getStringFromFile(file);
     
     Document document;
     if (!parseJsonData(document, data))
@@ -190,8 +176,15 @@ void MoreApps::iconTouchEvent(cocos2d::Ref *ref, Widget::TouchEventType type)
             break;
             
         case cocos2d::ui::Widget::TouchEventType::ENDED:
-            TLog("MoreApps::iconTouchEvent -- %s -- %s", icon_name.c_str(), _appLinksData.at(icon_name)._ios.c_str());
-            Tiger::openUrl(_appLinksData.at(icon_name)._ios);
+        {
+            std::string url = "";
+#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+            url = _appLinksData.at(icon_name)._ios;
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            url = _appLinksData.at(icon_name)._googlePlay;
+#endif
+            Tiger::openUrl(url);
+        }
             break;
             
         default:

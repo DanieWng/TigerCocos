@@ -64,7 +64,7 @@ bool CustomToast::init()
     
     auto size = Director::getInstance()->getVisibleSize();
     
-    _toastMsg = LabelTTF::create("", "Consolas", 20);
+    _toastMsg = Label::createWithSystemFont("", "Consolas", 20);
     _toastMsg->setName("");
     _toastMsg->setPosition( Vec2(size.width/2, 40) );
     _toastMsg->setOpacity(0);
@@ -88,14 +88,13 @@ bool CustomToast::initWithMsg(const std::string &msg)
     
     auto size = Director::getInstance()->getVisibleSize();
     
-    _toastMsg = LabelTTF::create(msg, "Consolas", 20);
+    _toastMsg = Label::createWithSystemFont(msg, "Consolas", 20);
     _toastMsg->setName(msg);
     _toastMsg->setPosition(Vec2(size.width/2, 40));
     _toastMsg->setOpacity(0);
     this->addChild(_toastMsg, 1);
     
     _bgLayer = LayerColor::create(Color4B(0, 0, 0, 0));
-    
     _bgLayer->setContentSize(Size(_toastMsg->getContentSize().width + MARGIN_LEFT_RIGHT,
                                   _toastMsg->getContentSize().height + MARGIN_TOP_BOTTOM));
     
@@ -111,10 +110,15 @@ bool CustomToast::initWithMsg(const std::string &msg)
 
 void CustomToast::setToastMsg(const std::string& msg)
 {
+    auto size = Director::getInstance()->getVisibleSize();
+    
     _toastMsg->setString(msg);
     
     _bgLayer->setContentSize(Size(_toastMsg->getContentSize().width + MARGIN_LEFT_RIGHT,
                                   _toastMsg->getContentSize().height + MARGIN_TOP_BOTTOM));
+    
+    _bgLayer->setPosition(Vec2(size.width/2 - _bgLayer->getContentSize().width/2,
+                               20));
 }
 
 void CustomToast::show()

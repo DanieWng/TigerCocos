@@ -18,23 +18,6 @@
 
 BaseAppConfig* BaseAppConfig::_instance = nullptr;
 
-BaseAppConfig::BaseAppConfig()
-{
-    setDeviceType(Tiger::DeviceType::kiPad);
-    setCurLanguage(cocos2d::LanguageType::ENGLISH);
-    
-    _curVersionData = Tiger::VersionData();
-    
-    _moreappsPath = "";
-    _lastConnectDate = 0;
-    
-    initUserDefault();
-}
-
-BaseAppConfig::~BaseAppConfig()
-{
-}
-
 BaseAppConfig* BaseAppConfig::getInstance()
 {
     if (!_instance)
@@ -47,47 +30,22 @@ BaseAppConfig* BaseAppConfig::getInstance()
 
 void BaseAppConfig::destoryInstance()
 {
-    if (_instance)
-    {
-        CC_SAFE_DELETE(_instance);
-        _instance = nullptr;
-    }
 }
 
-const Size BaseAppConfig::getDesginResoucesSizeByDevice()
+BaseAppConfig::BaseAppConfig()
 {
-    Size ret = DEFAULT_SCENE_SIZE;
+    setDeviceType(Tiger::DeviceType::kiPad);
+    setCurLanguage(cocos2d::LanguageType::ENGLISH);
     
-    switch (_curDevice)
-    {
-        case Tiger::DeviceType::kiPad_Retina:
-        case Tiger::DeviceType::kiphone6plus:
-            return ret*2;
-            break;
-            
-        default:
-            break;
-    }
+    _curVersionData = Tiger::VersionData();
     
-    return ret;
+    _moreappsPath = "";
+    _lastConnectDate = 0;
 }
 
-const float BaseAppConfig::getSceneScaleFactor()
+BaseAppConfig::~BaseAppConfig()
 {
-    float ret = DEFAULT_SCENE_SCALE_FACTOR;
-    
-    switch (_curDevice)
-    {
-        case Tiger::DeviceType::kiPad_Retina:
-        case Tiger::DeviceType::kiphone6plus:
-            return ret*2.0f;
-            break;
-            
-        default:
-            break;
-    }
-    
-    return ret;
+    TLog("BaseAppConfig::~BaseAppConfig");
 }
 
 const std::string BaseAppConfig::getLanguageLetter()
@@ -107,7 +65,8 @@ const std::string BaseAppConfig::getLanguageLetter()
     return ret;
 }
 
-void BaseAppConfig::initUserDefault()
+
+bool BaseAppConfig::initUserDefault()
 {
     auto ud = UserDefault::getInstance();
     
@@ -115,26 +74,25 @@ void BaseAppConfig::initUserDefault()
     {
         // init user default
         ud->setBoolForKey(KEY_USERDEFAULT_IS_EXIST, true);
-        ud->setIntegerForKey(KEY_CUR_LANGUAGE, static_cast<int>(_curLanguage));
-        
+//        ud->setIntegerForKey(KEY_CUR_LANGUAGE, static_cast<int>(_curLanguage));
         ud->setIntegerForKey(VERSION_JSON_MEMBER_VERSION, _curVersionData._version);
         ud->setIntegerForKey(VERSION_JSON_MEMBER_LAST_RELEASE_DATE, _curVersionData._lastAppReleaseDate);
         ud->setStringForKey(VERSION_JSON_MEMBER_NEW_DOWNLOAD_URL, _curVersionData._resDownloadUrl);
-        
         ud->setIntegerForKey(KEY_LAST_CONNECT_SERVER_DATE, _lastConnectDate);
-        
         ud->flush();
+        
+        return true;
     }
     else
     {
         // get data from user default
-        _curLanguage = static_cast<LanguageType>(ud->getIntegerForKey(KEY_CUR_LANGUAGE));
-        
+//        _curLanguage = static_cast<LanguageType>(ud->getIntegerForKey(KEY_CUR_LANGUAGE));
         _curVersionData._version = ud->getIntegerForKey(VERSION_JSON_MEMBER_VERSION);
         _curVersionData._lastAppReleaseDate = ud->getIntegerForKey(VERSION_JSON_MEMBER_LAST_RELEASE_DATE);
         _curVersionData._resDownloadUrl = ud->getStringForKey(VERSION_JSON_MEMBER_NEW_DOWNLOAD_URL);
-        
         _lastConnectDate = ud->getIntegerForKey(KEY_LAST_CONNECT_SERVER_DATE);
+        
+        return false;
     }
 }
 
@@ -142,15 +100,11 @@ void BaseAppConfig::saveUserDefault()
 {
     auto ud = UserDefault::getInstance();
     
-    ud->setIntegerForKey(KEY_CUR_LANGUAGE, static_cast<int>(_curLanguage));
-    
+//    ud->setIntegerForKey(KEY_CUR_LANGUAGE, static_cast<int>(_curLanguage));
     ud->setIntegerForKey(VERSION_JSON_MEMBER_VERSION, _curVersionData._version);
     ud->setIntegerForKey(VERSION_JSON_MEMBER_LAST_RELEASE_DATE, _curVersionData._lastAppReleaseDate);
     ud->setStringForKey(VERSION_JSON_MEMBER_NEW_DOWNLOAD_URL, _curVersionData._resDownloadUrl);
-    
     ud->setIntegerForKey(KEY_LAST_CONNECT_SERVER_DATE, _lastConnectDate);
-
-    UserDefault::getInstance()->flush();
 }
 
 /*
@@ -195,12 +149,12 @@ void BaseAppConfig::setSupportMultiDisplay()
     {
         // 4 : 3, as Mi Pad.
         setDeviceType(Tiger::DeviceType::kiPad);
-        
-    }else if((int)win_size.width >= 1920)
+    }
+    else if((int)win_size.width >= 1920)
     {
         // 16 : 9, as 1920 x 1080
         setDeviceType(Tiger::DeviceType::kAndroid_HD);
-        
+
     }else
     {
         // as 1280 x 720
@@ -229,6 +183,41 @@ void BaseAppConfig::setSupportMultiDisplay()
                                                                       ResolutionPolicy::FIXED_HEIGHT);
 }
 
+cocos2d::Size BaseAppConfig::getDesginResoucesSizeByDevice()
+{
+    Size ret = DEFAULT_SCENE_SIZE;
+    
+    switch (_curDevice)
+    {
+        case Tiger::DeviceType::kiPad_Retina:
+        case Tiger::DeviceType::kiphone6plus:
+            return ret*2;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return ret;
+}
+
+const float BaseAppConfig::getSceneScaleFactor()
+{
+    float ret = DEFAULT_SCENE_SCALE_FACTOR;
+    
+    switch (_curDevice)
+    {
+        case Tiger::DeviceType::kiPad_Retina:
+        case Tiger::DeviceType::kiphone6plus:
+            return ret*2.0f;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return ret;
+}
 
 
 

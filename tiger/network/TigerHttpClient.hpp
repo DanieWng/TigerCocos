@@ -14,6 +14,7 @@
 #include <external/json/rapidjson.h>
 #include <external/json/document.h>
 
+USING_NS_CC;
 using namespace rapidjson;
 using namespace cocos2d::network;
 
@@ -24,12 +25,8 @@ namespace Tiger
 {
     static inline const std::string getResponseString(HttpResponse *response)
     {
-        std::string data = "";
         std::vector<char>* v = response->getResponseData();
-        for (int i=0; i<v->size(); i++)
-        {
-            data.append(cocos2d::__String::createWithFormat("%c", v->at(i))->getCString());
-        }
+        std::string data(&(v->front()), v->size());
         
         CCLOG("getResponseString : \n%s", data.c_str());
         

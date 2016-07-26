@@ -22,6 +22,13 @@ namespace Tiger
         std::string _lastName;
     };
     
+    class TigerNewsLetterHttpDelegate
+    {
+    public:
+        
+        virtual void putNewsLetterHttpStatusCode(const int code) {};
+    };
+    
     class TigerNewsLetter
     {
     public:
@@ -36,17 +43,22 @@ namespace Tiger
                                    const std::string& listID,
                                    const NewsLetterMemberData& data,
                                    const bool isRunBackground);
-        
         /*
-            Listen http callback
+        Listen http callback
          */
         bool listenHttpResult(HttpResponse *response);
+        
+        void setDelegate(TigerNewsLetterHttpDelegate* d);
+        
+    private:
+        
+        void doPutEvent(const std::string& url, const NewsLetterMemberData& data);
         
     private:
         
         static TigerNewsLetter* _instance;
-        
-        bool _isRunBackground;
+    
+        TigerNewsLetterHttpDelegate *_delegate;
     };
     
 };

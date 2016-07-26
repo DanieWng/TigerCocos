@@ -10,16 +10,16 @@
 #include "cocos2d.h"
 #include "platform/android/jni/JniHelper.h"
 
-#define NDK_HELPER_JAVA                     "com/yfactory/biberandredboots/TigerCocos2dActivity"
+#define NDK_HELPER_JAVA                     "org/cocos2dx/cpp/TigerCocos2dActivity"
 #define CALL_MAIL_METHOD                    "callMail"
 #define CALL_MAIL_WITH_IMAGE_METHOD         "trySendAnMailWithImage"
 #define CALL_WEB_METHOD                     "callWeb"
 #define CALL_IS_CONNECTION                  "callIsInternetConnection"
 #define CALL_GET_VAILABLE_MEMORY_SIZE       "tryGetAvailableInternalMemorySize"
-#define CALL_EXIT_METHOD                    "callExit"
 #define CALL_SAVE_IMAGE_TO_SD_METHOD        "trySaveImageToSdcard"
 #define CALL_SAVE_IMAGE_TO_ALBUM_METHOD     "trySaveImageToPhotoAlbum"
-
+#define CALL_OPEN_URL                       "tryOpenURL"
+#define CALL_SEND_SCENE_NAME_TO_GAI         "trySendSceneNameToGoogleAnalytics"
 
 
 void TigerJNICalls::trySendAnEmail(const char *addres, const char *title, const char *body)
@@ -156,170 +156,41 @@ const char* TigerJNICalls::trySaveImageToSdcard(const char* fileName)
         jstring sd_path = (jstring)jmi.env->CallStaticObjectMethod(jmi.classID, jmi.methodID, js);
         
         const char* path_str = jmi.env->GetStringUTFChars(sd_path, JNI_FALSE);
-        
-        cocos2d::log("path_str: %s", path_str);
-        
         return path_str;
     }
 }
 
-void TigerJNICalls::tryAddSliderInCoverScene()
+void TigerJNICalls::tryOpenUrl(const char* url)
 {
     cocos2d::JniMethodInfo jmi;
     
     bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
                                                            NDK_HELPER_JAVA,
-                                                           "tryAddSliderInCoverScene",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::tryAddSliderInMainScene()
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryAddSliderInMainScene",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::tryAddSliderInPageScene()
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryAddSliderInPageScene",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::tryAddSliderInLoadScene()
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryAddSliderInLoadScene",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::tryAddSliderInGameScene()
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryAddSliderInGameScene",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::tryPreloadBiberBGM(const char* soundFile)
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryPreloadBiberBGM",
+                                                           CALL_OPEN_URL,
                                                            "(Ljava/lang/String;)V");
+    
     if (isExist)
     {
-        jstring sound = jmi.env->NewStringUTF(soundFile);
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID, sound);
+        jstring js = jmi.env->NewStringUTF(url);
+        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID, js);
     }
 }
 
-void TigerJNICalls::tryPlayBiberBGM(const char* soundFile, bool isLoop)
+void TigerJNICalls::trySendSceneNameToGoogleAnalytics(const char* scene)
 {
     cocos2d::JniMethodInfo jmi;
     
     bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
                                                            NDK_HELPER_JAVA,
-                                                           "tryPlayBiberBGM",
-                                                           "(Ljava/lang/String;Z)V");
-    if (isExist)
-    {
-        jstring sound = jmi.env->NewStringUTF(soundFile);
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID, sound, isLoop);
-    }
-}
-
-void TigerJNICalls::tryPauseBiberBGM()
-{
-    cocos2d::JniMethodInfo jmi;
+                                                           CALL_SEND_SCENE_NAME_TO_GAI,
+                                                           "(Ljava/lang/String;)V");
     
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryPauseBiberBGM",
-                                                           "()V");
     if (isExist)
     {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
+        jstring js = jmi.env->NewStringUTF(scene);
+        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID, js);
     }
 }
-
-void TigerJNICalls::tryResumeBiberBGM()
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryResumeBiberBGM",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::tryStopBiberBGM()
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "tryStopBiberBGM",
-                                                           "()V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID);
-    }
-}
-
-void TigerJNICalls::trySetBiberBGMVolume(float volume)
-{
-    cocos2d::JniMethodInfo jmi;
-    
-    bool isExist = cocos2d::JniHelper::getStaticMethodInfo(jmi,
-                                                           NDK_HELPER_JAVA,
-                                                           "trySetBiberBGMVolume",
-                                                           "(F)V");
-    if (isExist)
-    {
-        jmi.env->CallStaticVoidMethod(jmi.classID, jmi.methodID, volume);
-    }
-}
-
-
 
 
 

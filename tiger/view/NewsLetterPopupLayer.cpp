@@ -24,7 +24,6 @@ NewsLetterPopupLayer::~NewsLetterPopupLayer()
 void NewsLetterPopupLayer::onEnter()
 {
     TigerBasePopupLayer::onEnter();
-    
 }
 
 bool NewsLetterPopupLayer::init()
@@ -39,12 +38,12 @@ bool NewsLetterPopupLayer::init()
     
     addShadowLayer(visible_size);
     
-    auto bg = Sprite::create("common/newsletter/newsletter_pop_bg.png");
-    Tiger::setPosBaseRetina(bg,
-                            Vec2(514, 361),
-                            Vec2::ANCHOR_BOTTOM_LEFT,
-                            scene_scale/2.0f);
-    this->addChild(bg);
+    _popup = Sprite::create("common/newsletter/newsletter_pop_bg.png");
+    Tiger::setPosAndAnchorPointAndTag(_popup,
+                                      Vec2(visible_size.width/2, visible_size.height/2),
+                                      Vec2::ANCHOR_MIDDLE,
+                                      0);
+    this->addChild(_popup);
     
     auto btn_cancel = Tiger::createButton("common/newsletter/newsletter_pop_btn_cancel.png",
                                           "common/newsletter/newsletter_pop_btn_cancel.png",
@@ -57,7 +56,7 @@ bool NewsLetterPopupLayer::init()
                             scene_scale/2.0f,
                             false);
     btn_cancel->setTag(UIButtonTag::kCancel);
-    bg->addChild(btn_cancel);
+    _popup->addChild(btn_cancel);
     
     auto btn_ok = Tiger::createButton("common/newsletter/newsletter_pop_btn_ok.png",
                                       "common/newsletter/newsletter_pop_btn_ok.png",
@@ -70,7 +69,7 @@ bool NewsLetterPopupLayer::init()
                             scene_scale/2.0f,
                             false);
     btn_ok->setTag(UIButtonTag::kOk);
-    bg->addChild(btn_ok);
+    _popup->addChild(btn_ok);
     
     _email = EditBox::create(Size(520, 60)*(scene_scale/2.0f), "common/orange_edit.png");
     Tiger::setPosBaseRetina(_email,
@@ -83,7 +82,8 @@ bool NewsLetterPopupLayer::init()
     _email->setDelegate(this);
     _email->setReturnType(EditBox::KeyboardReturnType::DONE);
     _email->setInputMode(cocos2d::ui::EditBox::InputMode::EMAIL_ADDRESS);
-    bg->addChild(_email);
+    _email->setPlaceHolder("Required*");
+    _popup->addChild(_email);
     
     _firstName = EditBox::create(Size(422, 60)*(scene_scale/2.0f), "common/orange_edit.png");
     Tiger::setPosBaseRetina(_firstName,
@@ -96,7 +96,8 @@ bool NewsLetterPopupLayer::init()
     _firstName->setDelegate(this);
     _firstName->setReturnType(EditBox::KeyboardReturnType::DONE);
     _firstName->setInputMode(cocos2d::ui::EditBox::InputMode::SINGLE_LINE);
-    bg->addChild(_firstName);
+    _firstName->setPlaceHolder("Optional");
+    _popup->addChild(_firstName);
     
     _lastName = EditBox::create(Size(422, 60)*(scene_scale/2.0f), "common/orange_edit.png");
     Tiger::setPosBaseRetina(_lastName,
@@ -109,11 +110,14 @@ bool NewsLetterPopupLayer::init()
     _lastName->setDelegate(this);
     _lastName->setReturnType(EditBox::KeyboardReturnType::DONE);
     _lastName->setInputMode(cocos2d::ui::EditBox::InputMode::SINGLE_LINE);
-    bg->addChild(_lastName);
+    _lastName->setPlaceHolder("Optional");
+    _popup->addChild(_lastName);
     
     _email->setOpacity(0);
     _firstName->setOpacity(0);
     _lastName->setOpacity(0);
+    
+    _popup->setVisible(false);
     
     return true;
 }
@@ -196,9 +200,35 @@ void NewsLetterPopupLayer::editBoxReturn(cocos2d::ui::EditBox *editBox)
 {
 }
 
+void NewsLetterPopupLayer::show()
+{
+    this->setVisible(true);
+    setTouchListenerEnable(true);
+    
+    _popup->setVisible(true);
+    
+    _popup->setScale(0.1f);
+    _popup->setOpacity(0.0f);
+    
+    _popup->runAction(Sequence::create(Spawn::create(EaseBackOut::create(ScaleTo::create(0.15f, 1.0f)),
+                                                     FadeIn::create(0.1f),
+                                                     nullptr),
+                                       CallFunc::create(LAMBDA_FUNCTION_START
+                                                        _email->touchDownAction(_email, Widget::TouchEventType::ENDED);
+                                                        RETURN_DELEGATE_2(_layerStatusDelegate, this, LayerStatus::kShow);
+                                                        LAMBDA_FUNCTION_END),
+                                       nullptr));
+}
 
-
-
+void NewsLetterPopupLayer::hide()
+{
+    setTouchListenerEnable(false);
+    
+    getShadowLayer()->setVisible(false);
+    _popup->setVisible(false);
+    
+    RETURN_DELEGATE_2(_layerStatusDelegate, this, LayerStatus::kHide);
+}
 
 
 
